@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model refreshRuns {
+  id   Int       @id @default(autoincrement())
+  date DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model userSummary {
+  id            Int        @id @default(autoincrement())
+  user_id       String?    @unique
+  email         String?
+  name          String?
+  surname       String?
+  week_trans    Int?
+  daily_trans   Int?
+  monthly_trans Int?
+  mp            Boolean?
+  country       String?
+  phone         String?
+  created_at    DateTime?
+  last_update   DateTime?  @db.Timestamp(6)
+  contacts      contacts[]
+}
+
+enum ContactState {
+  contacted
+  talking
+  finalizado
+}
+
+enum ContactObjective {
+  activation
+  increase_trans
+  MP
+}
+
+enum media {
+  number
+  email
+}
+
+model contacts {
+  id         Int               @id @default(autoincrement())
+  user_id    String?
+  state      ContactState      @default(contacted)
+  start_date DateTime?         @default(now()) @db.Timestamp(6)
+  end_date   DateTime?         @db.Timestamp(6)
+  objective  ContactObjective?
+  media      media?
+  user       userSummary?      @relation(fields: [user_id], references: [user_id])
+  notes      notes[]
+}
+
+model notes {
+  id         Int       @id @default(autoincrement())
+  contact_id Int
+  text       String?
+  title      String?
+  date       DateTime? @default(now()) @db.Timestamp(6)
+  contact    contacts? @relation(fields: [contact_id], references: [id])
+}

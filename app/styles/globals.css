@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@plugin "daisyui";
+
+:root {
+  --bg-dark: #131313;
+  --surface-dark: #262625;
+  --surface-hover: #4B4A48;
+  --gold-accent: #efd395;
+  --text-main: #ffffff;
+  --text-sec: #A4A4A4;
+  --text-muted: #777674;
+}
+
+@theme inline {
+  --color-background: var(--bg-dark);
+  --color-foreground: var(--text-main);
+  
+  --color-lux-bg: var(--bg-dark);
+  --color-lux-surface: var(--surface-dark);
+  --color-lux-hover: var(--surface-hover);
+  --color-lux-gold: var(--gold-accent);
+  --color-lux-text: var(--text-main);
+  --color-lux-sec: var(--text-sec);
+  --color-lux-muted: var(--text-muted);
+
+  --font-nunito: "Nunito", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-nunito);
+}
+
+::selection {
+  background-color: var(--gold-accent);
+  color: var(--bg-dark);
+}
+
+/* Scrollbar customization for luxury feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-hover);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-sec);
+}
