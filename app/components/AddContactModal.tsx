@@ -37,7 +37,7 @@ export default function AddContactModal({ userId }: { userId: string }) {
     <>
       <button 
         onClick={openModal}
-        className="bg-lux-gold text-lux-bg px-4 py-1.5 rounded text-sm font-bold hover:bg-[#d8be86] transition-colors shadow-sm"
+        className="bg-lux-gold text-lux-bg px-4 py-1.5 rounded text-sm font-bold transition-colors shadow-sm"
       >
         + Añadir
       </button>
@@ -51,7 +51,7 @@ export default function AddContactModal({ userId }: { userId: string }) {
               <label className="label">
                 <span className="label-text text-lux-sec font-semibold tracking-wide uppercase text-xs">Estado</span>
               </label>
-              <select name="state" className="select select-bordered w-full bg-[#1a1a19] text-white border-lux-hover/30 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold" required defaultValue="contacted">
+              <select name="state" className="select select-bordered w-full bg-lux-bg text-white border-lux-hover/30 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold" required defaultValue="contacted">
                 <option value="contacted">Contactado</option>
                 <option value="talking">En conversación</option>
                 <option value="finalizado">Finalizado</option>
@@ -62,7 +62,7 @@ export default function AddContactModal({ userId }: { userId: string }) {
               <label className="label">
                 <span className="label-text text-lux-sec font-semibold tracking-wide uppercase text-xs">Objetivo</span>
               </label>
-              <select name="objective" className="select select-bordered w-full bg-[#1a1a19] text-white border-lux-hover/30 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold" required defaultValue="activation">
+              <select name="objective" className="select select-bordered w-full bg-lux-bg text-white border-lux-hover/30 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold" required defaultValue="activation">
                 <option value="activation">Activación</option>
                 <option value="increase_trans">Aumentar transacciones</option>
                 <option value="MP">Mercado Pago</option>
@@ -73,7 +73,7 @@ export default function AddContactModal({ userId }: { userId: string }) {
               <label className="label">
                 <span className="label-text text-lux-sec font-semibold tracking-wide uppercase text-xs">Medio</span>
               </label>
-              <select name="media" className="select select-bordered w-full bg-[#1a1a19] text-white border-lux-hover/30 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold" required defaultValue="email">
+              <select name="media" className="select select-bordered w-full bg-lux-bg text-white border-lux-hover/30 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold" required defaultValue="email">
                 <option value="email">Email</option>
                 <option value="number">Teléfono</option>
               </select>
@@ -83,7 +83,7 @@ export default function AddContactModal({ userId }: { userId: string }) {
               <button type="button" className="btn btn-ghost text-lux-sec hover:bg-lux-hover/30" onClick={closeModal} disabled={isPending}>
                 Cancelar
               </button>
-              <button type="submit" className="btn bg-lux-gold text-lux-bg hover:bg-[#d8be86] border-none font-bold px-6 shadow-sm" disabled={isPending}>
+              <button type="submit" className="btn bg-lux-gold text-lux-bg border-none font-bold px-6 shadow-sm" disabled={isPending}>
                 {isPending ? "Guardando..." : "Guardar Contacto"}
               </button>
             </div>

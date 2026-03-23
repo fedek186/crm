@@ -1,9 +1,12 @@
 "use server";
 
+import { assertAuthenticatedAdmin } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 export async function addNoteAction(formData: FormData) {
+  await assertAuthenticatedAdmin();
+
   const contactId = Number(formData.get("contactId"));
   const userId = formData.get("userId") as string;
   const title = formData.get("title") as string;
@@ -27,6 +30,8 @@ export async function addNoteAction(formData: FormData) {
 }
 
 export async function updateNoteAction(formData: FormData) {
+  await assertAuthenticatedAdmin();
+
   const noteId = Number(formData.get("noteId"));
   const userId = formData.get("userId") as string;
   const title = formData.get("title") as string;

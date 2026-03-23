@@ -1,11 +1,13 @@
 import Link from "next/link";
 import getSupabaseData from "./actions/supabaseActions";
+import { requireAuthenticatedAdminPage } from "./lib/auth";
 import { getUsersFromNeon } from "./services/userService";
 import SearchTableInput from "./components/SearchTableInput";
 import SortableHeader from "./components/SortableHeader";
 import Pagination from "./components/Pagination";
 
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
+  await requireAuthenticatedAdminPage();
   const searchParams = (await props.searchParams) || {};
   
   const page = Number(searchParams.page) || 1;
@@ -34,7 +36,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
             <SearchTableInput />
             <form action={getSupabaseData} className="w-full sm:w-auto">
-              <button type="submit" className="w-full sm:w-auto bg-lux-gold text-lux-bg px-6 py-2.5 rounded-md font-medium hover:bg-[#d8be86] transition-all shadow-[0_0_15px_rgba(239,211,149,0.1)] hover:shadow-[0_0_20px_rgba(239,211,149,0.25)] flex items-center justify-center">
+              <button type="submit" className="w-full sm:w-auto bg-lux-gold text-lux-bg px-6 py-2.5 rounded-md font-medium transition-all shadow-[0_0_15px_rgba(241,111,132,0.12)] hover:shadow-[0_0_20px_rgba(241,111,132,0.28)] flex items-center justify-center">
                 Sincronizar
               </button>
             </form>
@@ -45,7 +47,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
           <div className="overflow-x-auto">
             <table className="w-full text-left whitespace-nowrap">
               <thead>
-                <tr className="border-b border-lux-hover/60 text-[11px] font-semibold uppercase tracking-widest text-lux-sec bg-[#1f1f1e]">
+                <tr className="border-b border-lux-hover/60 text-[11px] font-semibold uppercase tracking-widest text-lux-sec bg-lux-surface">
                   <SortableHeader title="ID" column="id" />
                   <SortableHeader title="Nombre" column="name" />
                   <SortableHeader title="Apellido" column="surname" />

@@ -1,4 +1,5 @@
 
+import { requireAuthenticatedAdminPage } from "@/app/lib/auth";
 import { getUserProfile } from "@/app/services/userService";
 import { notFound } from "next/navigation";
 import CardContacto from "@/app/components/CardContacto";
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default async function ProfilePage({ params }: Props) {
+  await requireAuthenticatedAdminPage();
   const { id } = await params;
   const user = await getUserProfile(id);
   if (!user) {
@@ -36,7 +38,7 @@ export default async function ProfilePage({ params }: Props) {
             
             {/* Lado Izquierdo: Información del Usuario */}
             <div className="flex-1 w-full space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 bg-[#1a1a19] p-5 rounded-lg border border-lux-hover/30">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 bg-lux-bg p-5 rounded-lg border border-lux-hover/30">
               <div>
                 <span className="text-lux-sec text-[11px] block uppercase tracking-wider font-semibold mb-1">Registro Inicial</span>
                 <span className="text-white font-medium text-sm">{user.created_at ? user.created_at.toLocaleString() : 'N/A'}</span>
@@ -64,7 +66,7 @@ export default async function ProfilePage({ params }: Props) {
               </div>
             </div>
 
-            <div className="bg-[#1a1a19] p-5 rounded-lg border border-lux-hover/30">
+            <div className="bg-lux-bg p-5 rounded-lg border border-lux-hover/30">
               <h3 className="text-lux-sec text-xs uppercase tracking-widest font-bold mb-4 border-b border-lux-hover/30 pb-3">Estadísticas de transacciones</h3>
               <div className="grid grid-cols-3 gap-3">
                 <div className="flex flex-col items-center justify-center bg-lux-bg p-3 rounded border border-lux-hover/20">
@@ -75,7 +77,7 @@ export default async function ProfilePage({ params }: Props) {
                   <span className="text-lux-sec text-[10px] uppercase font-bold mb-1">Semanales</span>
                   <span className="text-white font-bold text-lg">{user.week_trans || 0}</span>
                 </div>
-                <div className="flex flex-col items-center justify-center bg-lux-bg p-3 border border-lux-gold/30 rounded shadow-[0_0_10px_rgba(239,211,149,0.05)]">
+                <div className="flex flex-col items-center justify-center bg-lux-bg p-3 border border-lux-gold/30 rounded shadow-[0_0_10px_rgba(241,111,132,0.08)]">
                   <span className="text-lux-gold font-bold text-[10px] uppercase tracking-wide mb-1">Mensuales</span>
                   <span className="text-lux-gold font-bold text-2xl">{user.monthly_trans || 0}</span>
                 </div>
@@ -87,7 +89,7 @@ export default async function ProfilePage({ params }: Props) {
           <div className="hidden lg:block w-[400px] shrink-0 pointer-events-none"></div>
 
           {/* Lado Derecho: Contactos (Scrolleable) absolute posicionado dentro del flex container */}
-          <div className="mt-8 lg:mt-0 lg:absolute lg:top-0 lg:right-0 lg:bottom-0 w-full lg:w-[400px] border border-lux-hover/40 rounded-xl bg-[#1f1f1d] flex flex-col h-[400px] lg:h-auto shadow-inner overflow-hidden">
+          <div className="mt-8 lg:mt-0 lg:absolute lg:top-0 lg:right-0 lg:bottom-0 w-full lg:w-[400px] border border-lux-hover/40 rounded-xl bg-lux-surface flex flex-col h-[400px] lg:h-auto shadow-inner overflow-hidden">
             {/* Cabecera sticky del contenedor derecho */}
             <div className="px-6 py-5 border-b border-lux-hover/40 bg-lux-surface flex justify-between items-center z-10">
               <h3 className="text-white font-bold tracking-tight text-lg">Contactos</h3>
@@ -97,7 +99,6 @@ export default async function ProfilePage({ params }: Props) {
             {/* Lista Scrolleable */}
             <div className="p-5 overflow-y-auto flex-1 space-y-4">
               {user.contacts && user.contacts.length > 0 ? (
-                // @ts-ignore - Prisma relational typing inference fallback
                 user.contacts.map((c, i) => (
                   <CardContacto
                     key={c.id}

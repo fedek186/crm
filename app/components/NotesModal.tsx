@@ -81,7 +81,7 @@ export default function NotesModal({ contactId, userId, notesData }: NotesModalP
         <div className="modal-box w-11/12 max-w-5xl bg-lux-surface border border-lux-hover/40 text-white shadow-2xl p-0 overflow-hidden flex flex-col md:flex-row h-[85vh] md:h-[650px] relative">
           
           {/* Lado Izquierdo: Lista de Notas (Estilo Post-it) */}
-          <div className="w-full md:w-[350px] bg-[#171716] border-r border-lux-hover/30 flex flex-col h-[40%] md:h-full shrink-0">
+          <div className="w-full md:w-[350px] bg-lux-bg border-r border-lux-hover/30 flex flex-col h-[40%] md:h-full shrink-0">
             <div className="p-5 border-b border-lux-hover/30 flex justify-between items-center bg-lux-surface z-10 sticky top-0 shadow-sm">
               <h3 className="font-bold text-lg text-lux-gold tracking-tight">Bloc de Notas</h3>
               <button 
@@ -92,19 +92,19 @@ export default function NotesModal({ contactId, userId, notesData }: NotesModalP
               </button>
             </div>
             
-            <div className="p-5 overflow-y-auto flex-1 flex flex-col gap-4 bg-[#141413]">
+            <div className="p-5 overflow-y-auto flex-1 flex flex-col gap-4 bg-lux-bg">
               {notesData.map(note => (
                 <div 
                   key={note.id} 
                   onClick={() => handleSelectNote(note)}
                   className={`p-4 rounded shadow-md cursor-pointer transition-all border-l-4 hover:-translate-y-0.5 hover:shadow-lg ${
                     selectedNote?.id === note.id 
-                    ? 'border-lux-gold bg-lux-surface shadow-lux-gold/10' 
-                    : 'border-[#b59e66]/50 bg-[#1f1f1d] hover:bg-lux-surface'
+                    ? 'border-lux-gold bg-lux-surface shadow-[0_0_16px_rgba(241,111,132,0.12)]'
+                    : 'border-lux-hover/60 bg-lux-bg hover:bg-lux-surface'
                   }`}
                 >
                    <p className="text-[10px] text-lux-muted mb-2 tracking-wider font-mono">{note.date ? note.date.toLocaleString() : ''}</p>
-                   <h4 className="font-bold text-sm text-[#e6d5aa] leading-snug line-clamp-3">{note.title || "Sin título"}</h4>
+                   <h4 className="font-bold text-sm text-white leading-snug line-clamp-3">{note.title || "Sin título"}</h4>
                 </div>
               ))}
               {notesData.length === 0 && (
@@ -122,7 +122,7 @@ export default function NotesModal({ contactId, userId, notesData }: NotesModalP
                  {selectedNote ? 'Visualizar / Editar Nota' : 'Escribir Nueva Nota'}
                </h3>
                
-               <form onSubmit={handleSubmit} className="flex-1 flex flex-col h-full min-h-0 bg-[#1a1a19]/50 rounded-xl border border-lux-hover/20 p-6">
+               <form onSubmit={handleSubmit} className="flex-1 flex flex-col h-full min-h-0 bg-lux-bg/60 rounded-xl border border-lux-hover/20 p-6">
                  <div className="mb-6">
                    <input 
                      type="text" 
@@ -159,7 +159,7 @@ export default function NotesModal({ contactId, userId, notesData }: NotesModalP
                <button 
                  onClick={handleSubmit}
                  disabled={isPending || !title.trim()}
-                 className="px-6 py-2.5 rounded-lg bg-lux-gold text-lux-bg font-extrabold text-sm shadow-[0_0_15px_rgba(239,211,149,0.15)] hover:bg-[#d8be86] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                 className="px-6 py-2.5 rounded-lg bg-lux-gold text-lux-bg font-extrabold text-sm shadow-[0_0_15px_rgba(241,111,132,0.18)] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
                >
                  {selectedNote ? 'Actualizar Nota' : 'Guardar Nueva Nota'}
                </button>

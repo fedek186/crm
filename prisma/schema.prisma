@@ -65,3 +65,16 @@ model notes {
   date       DateTime? @default(now()) @db.Timestamp(6)
   contact    contacts? @relation(fields: [contact_id], references: [id])
 }
+
+model Merchant {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  domain     String?
+  logo_url   String?
+  aliases    String[] @default([])
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @updatedAt @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+
+  @@map("merchants")
+}
