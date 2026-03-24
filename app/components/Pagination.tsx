@@ -1,9 +1,10 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
 export default function Pagination({ totalPages }: { totalPages: number }) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
@@ -16,7 +17,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
     params.set("page", page.toString());
     
     startTransition(() => {
-      router.push(`/?${params.toString()}`, { scroll: false }); // scroll false evita que brinque top de golpe
+      router.push(`${pathname}?${params.toString()}`, { scroll: false }); // scroll false evita que brinque top de golpe
     });
   };
 
@@ -29,7 +30,7 @@ export default function Pagination({ totalPages }: { totalPages: number }) {
       >
         Ant.
       </button>
-      <div className="px-5 py-2 bg-[#1a1a19] border border-lux-hover/50 rounded-md text-lux-sec text-[13px] flex items-center justify-center gap-2 min-w-[140px]">
+      <div className="px-5 py-2 bg-lux-bg border border-lux-hover/50 rounded-md text-lux-sec text-[13px] flex items-center justify-center gap-2 min-w-[140px]">
         {isPending ? <span className="w-4 h-4 border-2 border-lux-gold border-t-transparent rounded-full animate-spin"></span> : <span>Pág <span className="text-white font-medium">{currentPage}</span> / {totalPages}</span>}
       </div>
       <button 

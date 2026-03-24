@@ -1,10 +1,13 @@
 "use server";
 
+import { assertAuthenticatedAdmin } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { ContactState, ContactObjective, media } from "@prisma/client";
 
 export async function addContactAction(formData: FormData) {
+  await assertAuthenticatedAdmin();
+
   const userId = formData.get("userId") as string;
   const state = formData.get("state") as ContactState;
   const objective = formData.get("objective") as ContactObjective;
@@ -30,6 +33,8 @@ export async function addContactAction(formData: FormData) {
 }
 
 export async function updateContactStateAction(contactId: number, newState: ContactState, userId: string) {
+  await assertAuthenticatedAdmin();
+
   try {
     await prisma.contacts.update({
       where: { id: contactId },

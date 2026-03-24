@@ -1,15 +1,34 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createAuthenticatedSupabaseClient, assertAuthenticatedAdmin } from "@/app/lib/auth";
+import { prisma } from "@/app/lib/prisma";
 
-import { supabase } from '../lib/supabase';
-import { prisma } from '../lib/prisma';
+type SupabaseUserRecord = {
+  country: string | null;
+  created_at: string | null;
+  email: string | null;
+  id: string | number;
+  name: string | null;
+  phone: string | number | null;
+  surname: string | null;
+  transactions: Array<{
+    date: string | null;
+    id: string | number;
+  }> | null;
+  user_integrations: Array<{
+    id: string | number;
+  }> | null;
+};
 
 export default async function getSupabaseData() {
-    const { data, error } = await supabase.from('users').select(`
+  await assertAuthenticatedAdmin();
+
+  const supabase = await createAuthenticatedSupabaseClient();
+  const { data, error } = await supabase.from("users").select(`
         id,
         email,
-        name, 
+        name,
         surname,
         phone,
         country,
@@ -18,91 +37,90 @@ export default async function getSupabaseData() {
         user_integrations(id)
     `);
 
-    if (error) {
-        throw error;
+  if (error) {
+    throw new Error(`No se pudieron sincronizar usuarios desde Supabase: ${error.message}`);
+  }
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const sevenDaysAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+  const thirtyDaysAgo = now.getTime() - 30 * 24 * 60 * 60 * 1000;
+
+  const processedData = ((data as SupabaseUserRecord[] | null) ?? []).map((user) => {
+    const hasMP = Boolean(user.user_integrations?.length);
+
+    let daily_trans = 0;
+    let week_trans = 0;
+    let monthly_trans = 0;
+
+    for (const transaction of user.transactions ?? []) {
+      if (!transaction.date) {
+        continue;
+      }
+
+      const transactionDate = new Date(transaction.date).getTime();
+
+      if (transactionDate >= startOfToday) {
+        daily_trans += 1;
+      }
+
+      if (transactionDate >= sevenDaysAgo) {
+        week_trans += 1;
+      }
+
+      if (transactionDate >= thirtyDaysAgo) {
+        monthly_trans += 1;
+      }
     }
 
-    // Definimos las fechas límite (se calcula una sola vez para ser eficiente)
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    const sevenDaysAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
-    const thirtyDaysAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
+    return {
+      country: user.country,
+      created_at: user.created_at,
+      daily_trans,
+      email: user.email,
+      id: user.id,
+      monthly_trans,
+      mp: hasMP,
+      name: user.name,
+      phone: user.phone,
+      surname: user.surname,
+      week_trans,
+    };
+  });
 
-    // Transformamos los datos
-    const processedData = data?.map((user: any) => {
-        const hasMP = user.user_integrations && user.user_integrations.length > 0;
-        
-        let daily_trans = 0;
-        let week_trans = 0;
-        let monthly_trans = 0;
+  const formattedPrismaData = processedData.map((user) => ({
+    country: user.country,
+    created_at: user.created_at ? new Date(user.created_at) : null,
+    daily_trans: user.daily_trans,
+    email: user.email,
+    last_update: new Date(),
+    monthly_trans: user.monthly_trans,
+    mp: user.mp,
+    name: user.name,
+    phone: user.phone ? String(user.phone) : null,
+    surname: user.surname,
+    user_id: String(user.id),
+    week_trans: user.week_trans,
+  }));
 
-        // Calculamos las métricas iterando sus transacciones
-        if (user.transactions && Array.isArray(user.transactions)) {
-            for (const tx of user.transactions) {
-                if (!tx.date) continue;
-                const txDate = new Date(tx.date).getTime();
-                
-                // Hoy (desde la medianoche actual)
-                if (txDate >= startOfToday) daily_trans++;
-                // Últimos 7 días
-                if (txDate >= sevenDaysAgo) week_trans++;
-                // Últimos 30 días
-                if (txDate >= thirtyDaysAgo) monthly_trans++;
-            }
-        }
-        
-        // Destructuramos para dejar afuera TANTO las integraciones como las transacciones
-        const { user_integrations, transactions, ...restOfUser } = user;
-        
-        return {
-            ...restOfUser,
-            mp: hasMP,
-            daily_trans,
-            week_trans,
-            monthly_trans
-        };
-    });
+  if (formattedPrismaData.length > 0) {
+    const upsertPromises = formattedPrismaData.map((summary) =>
+      prisma.userSummary.upsert({
+        create: summary,
+        update: summary,
+        where: { user_id: summary.user_id },
+      })
+    );
 
+    await Promise.all([
+      ...upsertPromises,
+      prisma.refreshRuns.create({
+        data: {
+          date: new Date(),
+        },
+      }),
+    ]);
+  }
 
-    const formattedPrismaData = processedData?.map((data) => ({
-        user_id: String(data.id), // nos aseguramos de que siempre sea texto para el id
-        email: data.email,
-        name: data.name,
-        surname: data.surname,
-        phone: data.phone ? String(data.phone) : null,
-        country: data.country,
-        created_at: data.created_at ? new Date(data.created_at) : null,
-        mp: data.mp,
-        daily_trans: data.daily_trans,
-        week_trans: data.week_trans,
-        monthly_trans: data.monthly_trans,
-        last_update: new Date()
-    }));
-
-    // Insertamos/Actualizamos en masa en NEON DB vía Prisma
-    if (formattedPrismaData && formattedPrismaData.length > 0) {
-
-        const upsertPromises = formattedPrismaData.map((summary) => 
-            prisma.userSummary.upsert({
-                where: { user_id: summary.user_id },
-                update: summary,
-                create: summary
-            })
-        );
-        
-        await Promise.all([
-            ...upsertPromises,
-            prisma.refreshRuns.create({
-                data: {
-                    date: new Date()
-                }
-            })
-        ]);
-        console.log(`¡Éxito! ${formattedPrismaData.length} registros guardados en la tabla de resúmenes Neon.`);
-    } else {
-        console.log("No se encontraron usuarios para insertar.");
-    }
-    
-    // Al finalizar todo el proceso, pedimos a Next.js que revalide (refresque) la página principal
-    revalidatePath("/");
+  revalidatePath("/");
 }

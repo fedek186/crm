@@ -1,24 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Local Development
 
-## Getting Started
+This project runs inside the [`crm`](/Users/tomas/Documents/GitHub/piggy-crm/crm) folder and is expected to use Node `22.13.0`.
 
-First, run the development server:
+1. Load the expected Node version with `nvm`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd /Users/tomas/Documents/GitHub/piggy-crm/crm
+export NVM_DIR="$HOME/.nvm"
+. "$NVM_DIR/nvm.sh"
+nvm use || nvm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create a local env file for development:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.production .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Install dependencies and start the development server:
+
+```bash
+npm ci
+npm run dev
+```
+
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000) with your browser.
+
+## Environment Variables
+
+The app expects at least:
+
+- `DATABASE_URL`
+- `SUPABASE_URL`
+- `SUPABASE_KEY`
+
+For local development, keep them in `.env.local`.
 
 ## Learn More
 

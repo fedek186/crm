@@ -1,5 +1,20 @@
+/* 
+Este archivo renderiza la pantalla principal de usuarios del panel de administración.
+      Protege el acceso para que solo entren administradores, muestra la tabla principal
+      de usuarios y permite filtrar, ordenar, paginar y navegar a la ficha individual.
+      
+      Elementos externos:
+      - requireAuthenticatedAdminPage: valida que la página solo pueda ser vista por un administrador autenticado.
+      - getUsersFromNeon: obtiene desde la base analítica los usuarios y la información necesaria para listar la tabla.
+      - getSupabaseData: ejecuta la sincronización de datos cuando el usuario aprieta el botón correspondiente.
+      - SearchTableInput: provee el buscador de la tabla.
+      - SortableHeader: permite ordenar columnas desde la cabecera.
+      - Pagination: muestra la navegación entre páginas del listado.
+*/
+
 import Link from "next/link";
 import getSupabaseData from "./actions/supabaseActions";
+import { requireAuthenticatedAdminPage } from "./lib/auth";
 import { getUsersFromNeon } from "./services/userService";
 import SearchTableInput from "./components/SearchTableInput";
 import SortableHeader from "./components/SortableHeader";
@@ -7,6 +22,7 @@ import Pagination from "./components/Pagination";
 import SyncButton from "./components/SyncButton";
 
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
+  await requireAuthenticatedAdminPage();
   const searchParams = (await props.searchParams) || {};
   
   const page = Number(searchParams.page) || 1;
@@ -44,7 +60,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
           <div className="overflow-x-auto">
             <table className="w-full text-left whitespace-nowrap">
               <thead>
-                <tr className="border-b border-lux-hover/60 text-[11px] font-semibold uppercase tracking-widest text-lux-sec bg-[#1f1f1e]">
+                <tr className="border-b border-lux-hover/60 text-[11px] font-semibold uppercase tracking-widest text-lux-sec bg-lux-surface">
                   <SortableHeader title="ID" column="id" />
                   <SortableHeader title="Nombre" column="name" />
                   <SortableHeader title="Apellido" column="surname" />

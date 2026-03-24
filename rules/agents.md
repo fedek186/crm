@@ -59,7 +59,34 @@ Cada vez que un Agente de IA interactúe con este repositorio, **DEBE CUMPLIR** 
      2. Ejecutar (o dar instrucciones al usuario para ejecutar): `npx prisma format` y luego `npx prisma db push` o `npx prisma migrate dev`.
      3. Ejecutar: `npx prisma generate` para actualizar los tipos.
 
-6. **Contexto Antes de Editar**:
+6. **Edición y creación de archivos**:
+   - En cada archivo que crees o modifiques, incluí al comienzo, antes de cualquier import, un **bloque breve de comentarios que describa la función del archivo dentro del proyecto**.  
+   - Ese bloque debe explicar **qué muestra, qué resuelve o qué provee el archivo**.  
+   - Cuando intervengan dependencias externas importantes (funciones, servicios, guards, helpers, componentes), **describí únicamente su rol dentro del flujo del archivo y del proyecto, sin entrar en detalles de implementación**.  
+   - **Si el archivo exporta funciones**, incluí también una sección donde se mencionen y se explique brevemente **qué hace cada función exportada dentro del sistema** (no cómo lo hace, sino su propósito).  
+   - Mantené estos comentarios **cortos, claros y con suficiente contexto** para que cualquier persona entienda rápidamente para qué existe el archivo.  
+   - **Seguí el estilo del ejemplo provisto**:
+      ```ts
+      /*
+      Este archivo renderiza la pantalla principal de usuarios del panel de administración.
+      Protege el acceso para que solo entren administradores, muestra la tabla principal
+      de usuarios y permite filtrar, ordenar, paginar y navegar a la ficha individual.
+
+      Elementos externos:
+      - requireAuthenticatedAdminPage: valida que la página solo pueda ser vista por un administrador autenticado.
+      - getUsersFromNeon: obtiene desde la base analítica los usuarios y la información necesaria para listar la tabla.
+      - getSupabaseData: ejecuta la sincronización de datos cuando el usuario aprieta el botón correspondiente.
+      - SearchTableInput: provee el buscador de la tabla.
+      - SortableHeader: permite ordenar columnas desde la cabecera.
+      - Pagination: muestra la navegación entre páginas del listado.
+
+      Funciones exportadas:
+      - signIn: maneja el inicio de sesión validando credenciales, permisos y creando la sesión.
+      - signOut: cierra la sesión del usuario tanto en la app como en el proveedor de autenticación.
+      */
+
+
+7. **Contexto Antes de Editar**:
    - Antes de modificar código, **siempre lee** los componentes o servicios implicados. No asumas que la funcionalidad existe sin verificar primero explorando los archivos.
 
 *Nota para el Agente: Estas prácticas (Next.js App Router, TS estricto, rutas ligeras y optimización de bundle) son requerimientos mandatorios del proyecto.*
