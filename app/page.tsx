@@ -4,6 +4,7 @@ import { getUsersFromNeon } from "./services/userService";
 import SearchTableInput from "./components/SearchTableInput";
 import SortableHeader from "./components/SortableHeader";
 import Pagination from "./components/Pagination";
+import SyncButton from "./components/SyncButton";
 
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
   const searchParams = (await props.searchParams) || {};
@@ -34,9 +35,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
             <SearchTableInput />
             <form action={getSupabaseData} className="w-full sm:w-auto">
-              <button type="submit" className="w-full sm:w-auto bg-lux-gold text-lux-bg px-6 py-2.5 rounded-md font-medium hover:bg-[#d8be86] transition-all shadow-[0_0_15px_rgba(239,211,149,0.1)] hover:shadow-[0_0_20px_rgba(239,211,149,0.25)] flex items-center justify-center">
-                Sincronizar
-              </button>
+              <SyncButton />
             </form>
           </div>
         </div>

@@ -69,7 +69,7 @@ export default function CardContacto({ id, userId, numero, objetivo, fechaInicio
         <h4 className="text-white font-bold text-lg">
           Contacto <span className="text-lux-gold">#{numero}</span>
         </h4>
-        <div className="dropdown dropdown-end">
+        <div className="dropdown dropdown-end group">
           <div 
              tabIndex={0} 
              role="button" 
@@ -81,7 +81,7 @@ export default function CardContacto({ id, userId, numero, objetivo, fechaInicio
                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
             </svg>
           </div>
-          <ul tabIndex={0} className="dropdown-content z-20 menu p-1.5 shadow-2xl bg-[#1f1f1d] border border-lux-hover/50 rounded-xl w-40 mt-1 flex flex-col gap-1 ring-1 ring-black/80">
+          <ul tabIndex={0} className="dropdown-content z-20 menu p-1.5 shadow-2xl bg-[#1f1f1d] border border-lux-hover/50 rounded-xl w-40 mt-1 flex flex-col gap-1 ring-1 ring-black/80 pointer-events-none group-focus-within:pointer-events-auto">
             <li>
                <button 
                   onClick={() => updateStatus('contacted')} 
