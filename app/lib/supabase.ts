@@ -1,3 +1,18 @@
+/*
+Este archivo centraliza la configuración base de Supabase para el proyecto.
+Define los nombres de cookies usados para autenticación, crea el cliente de Supabase
+para uso del lado del servidor y provee la validación de permisos de administrador.
+
+Elementos externos:
+- createClient: crea la conexión con Supabase usando la URL y la clave configuradas en el entorno.
+- SupabaseClient: tipa el cliente retornado para mantener consistencia en el proyecto.
+- User: representa el usuario autenticado sobre el que se validan permisos.
+
+Funciones exportadas:
+- createSupabaseServerClient: crea un cliente de Supabase preparado para ejecutarse del lado servidor, con opción de usar un access token existente.
+- isAdminUser: valida si un usuario autenticado tiene permisos de administrador según su metadata.
+*/
+
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 
 export const AUTH_ACCESS_COOKIE_NAME = "piggy-crm-access-token";

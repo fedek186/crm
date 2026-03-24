@@ -1,3 +1,15 @@
+/*
+Este archivo es un cliente de Prisma para conectarse a la base de datos de PiggyWarehouse.
+
+Elementos externos:
+- PrismaClient: cliente de Prisma.
+- PrismaPg: adaptador de Prisma para PostgreSQL.
+- Pool: pool de conexiones a PostgreSQL.
+
+Funciones exportadas:
+- createPrismaClient: crea un cliente de Prisma.
+*/
+
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";

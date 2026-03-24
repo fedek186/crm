@@ -1,3 +1,17 @@
+/* 
+Este archivo renderiza la pantalla principal de usuarios del panel de administración.
+      Protege el acceso para que solo entren administradores, muestra la tabla principal
+      de usuarios y permite filtrar, ordenar, paginar y navegar a la ficha individual.
+      
+      Elementos externos:
+      - requireAuthenticatedAdminPage: valida que la página solo pueda ser vista por un administrador autenticado.
+      - getUsersFromNeon: obtiene desde la base analítica los usuarios y la información necesaria para listar la tabla.
+      - getSupabaseData: ejecuta la sincronización de datos cuando el usuario aprieta el botón correspondiente.
+      - SearchTableInput: provee el buscador de la tabla.
+      - SortableHeader: permite ordenar columnas desde la cabecera.
+      - Pagination: muestra la navegación entre páginas del listado.
+*/
+
 import Link from "next/link";
 import getSupabaseData from "./actions/supabaseActions";
 import { requireAuthenticatedAdminPage } from "./lib/auth";

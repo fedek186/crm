@@ -1,5 +1,17 @@
 "use client";
 
+/*
+Este archivo renderiza el formulario de inicio de sesión del panel de administración.
+Captura las credenciales del usuario, envía el login mediante una Server Action
+y muestra el estado de carga o los errores de autenticación en la misma pantalla.
+
+Elementos externos:
+- useActionState: conecta el formulario con la Server Action y expone el estado actual de la operación.
+- signIn: procesa el inicio de sesión, valida credenciales y permisos, y crea la sesión del administrador.
+- initialAuthActionState: provee el estado inicial usado para manejar errores y respuesta del login.
+*/
+
+
 import { useActionState } from "react";
 import { signIn } from "@/app/actions/auth.actions";
 import { initialAuthActionState } from "@/app/lib/auth.types";

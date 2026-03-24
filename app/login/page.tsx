@@ -1,3 +1,14 @@
+/*
+Este archivo renderiza la pantalla de login del panel de administración.
+Presenta el acceso visual al CRM, muestra el formulario de inicio de sesión
+y redirige automáticamente a los administradores que ya tienen una sesión válida.
+
+Elementos externos:
+- redirectAuthenticatedAdminFromLogin: evita que un administrador autenticado vuelva a ver la pantalla de login y lo redirige al panel principal.
+- LoginForm: renderiza el formulario de autenticación para ingresar al CRM.
+*/
+
+
 import LoginForm from "@/app/components/auth/LoginForm";
 import { redirectAuthenticatedAdminFromLogin } from "@/app/lib/auth";
 

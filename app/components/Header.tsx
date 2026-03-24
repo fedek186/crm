@@ -1,3 +1,17 @@
+/*
+Este archivo renderiza el componente Header, que es la cabecera principal de la aplicación.
+Provee la navegación global, mostrando enlaces a las páginas principales (Usuarios,
+Transacciones, Merchants, Reportes y Ajustes) y maneja la visualización de estas
+opciones dependiendo de si el usuario está autenticado como administrador o no.
+
+Elementos externos:
+- Link: componente de Next.js usado para la navegación optimizada entre páginas.
+- signOut: server action para manejar el cierre de sesión del usuario.
+- getOptionalAuthContext: función que provee el contexto de autenticación y si el usuario es administrador.
+
+Funciones exportadas:
+- Header: renderiza la barra de navegación que se muestra en la parte superior de la aplicación.
+*/
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth.actions";
 import { getOptionalAuthContext } from "@/app/lib/auth";

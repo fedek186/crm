@@ -1,5 +1,24 @@
 "use server";
 
+/*
+Este archivo define las Server Actions de autenticación del panel de administración.
+Resuelve el inicio y cierre de sesión de administradores, valida credenciales y permisos,
+administra las cookies de sesión y redirige al usuario según el resultado de la operación.
+
+Elementos externos:
+- redirect: redirige al usuario a la ruta correspondiente después del login o logout.
+- clearAuthCookies: elimina las cookies de autenticación locales al cerrar sesión.
+- getOptionalAuthContext: recupera la sesión actual desde cookies si existe.
+- setAuthCookies: guarda en cookies la sesión autenticada luego del login.
+- AuthActionState: tipa el estado de respuesta usado por la acción de login.
+- createSupabaseServerClient: crea el cliente de Supabase para ejecutar operaciones de autenticación del lado servidor.
+- isAdminUser: valida si el usuario autenticado tiene permisos de administrador.
+
+Funciones exportadas:
+- signIn: procesa el inicio de sesión, valida credenciales y permisos de administrador, guarda la sesión y redirige al panel principal.
+- signOut: cierra la sesión actual en Supabase, limpia las cookies locales y redirige a la pantalla de login.
+*/
+
 import { redirect } from "next/navigation";
 import { clearAuthCookies, getOptionalAuthContext, setAuthCookies } from "@/app/lib/auth";
 import { type AuthActionState } from "@/app/lib/auth.types";

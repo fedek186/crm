@@ -1,5 +1,28 @@
 import "server-only";
 
+/* 
+Este archivo maneja la lógica de autenticación del lado del servidor.
+Incluye funciones para establecer y limpiar cookies de sesión, obtener el contexto de autenticación,
+validar que el usuario sea un administrador y redirigir según su estado.
+
+Elementos externos:
+- cookies: módulo de Next.js para manejar cookies en el servidor.
+- redirect: función de Next.js para redirigir al usuario.
+- Session, SupabaseClient, User: tipos de Supabase para manejar la sesión y el usuario.
+- AUTH_ACCESS_COOKIE_NAME, AUTH_REFRESH_COOKIE_NAME: constantes para los nombres de las cookies.
+- createSupabaseServerClient: función para crear un cliente de Supabase en el servidor.
+- isAdminUser: función para verificar si un usuario es administrador.
+
+Funciones exportadas:
+- setAuthCookies: establece las cookies de sesión.
+- clearAuthCookies: limpia las cookies de sesión.
+- getOptionalAuthContext: obtiene el contexto de autenticación.
+- assertAuthenticatedAdmin: valida que el usuario sea un administrador autenticado.
+- createAuthenticatedSupabaseClient: crea un cliente de Supabase autenticado.
+- requireAuthenticatedAdminPage: valida que la página solo pueda ser vista por un administrador autenticado.
+- redirectAuthenticatedAdminFromLogin: redirige al usuario si ya está autenticado.
+*/
+
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
