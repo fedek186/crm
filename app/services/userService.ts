@@ -1,3 +1,17 @@
+/*
+Este archivo provee los servicios encargados de la interacción con la base de datos para la entidad de usuarios.
+Se encarga de recuperar los listados (ya sea desde Neon DB mediante Prisma o con fallback a Supabase),
+manejar la lógica de paginación y filtrar la data en JavaScript (cuando hay parámetros de la interfaz). 
+También obtiene los perfiles individuales de forma detallada.
+
+Elementos externos:
+- assertAuthenticatedAdmin, createAuthenticatedSupabaseClient: módulos de validación y acceso seguro al backend.
+- prisma: ORM para la conexión local y ejecución a la base de datos principal PostgreSQL.
+
+Funciones exportadas:
+- getUsersFromNeon: obtiene la lista paginada y filtrada (vía código o búsqueda SQL) de los clientes/usuarios usando Prisma.
+- getUserProfile: recupera la ficha detallada (con interacciones comerciales previas) del perfil personal de un usuario.
+*/
 import { assertAuthenticatedAdmin, createAuthenticatedSupabaseClient } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 import { Prisma } from "@prisma/client";
@@ -228,6 +242,9 @@ export interface GetUsersOptions {
   search?: string;
   sortBy?: string;
   sortDesc?: boolean;
+  filterCol?: string;
+  filterOp?: string;
+  filterVal?: string;
 }
 
 export async function getUsersFromNeon(options: GetUsersOptions = {}) {
@@ -238,7 +255,7 @@ export async function getUsersFromNeon(options: GetUsersOptions = {}) {
     return getUsersFromSupabase(options);
   }
 
-  const { limit = 50, page = 1, search = "", sortBy = "created_at", sortDesc = true } = options;
+  const { limit = 50, page = 1, search = "", sortBy = "created_at", sortDesc = true, filterCol, filterOp, filterVal } = options;
   const skip = (page - 1) * limit;
   const where = search
     ? {
@@ -264,31 +281,108 @@ export async function getUsersFromNeon(options: GetUsersOptions = {}) {
     };
   }
 
+  const isCustomFilterActive = Boolean(filterCol && filterOp && filterVal);
+  const takeConfig = isCustomFilterActive ? undefined : limit;
+  const skipConfig = isCustomFilterActive ? undefined : skip;
+
   try {
-    const [users, totalCount] = await Promise.all([
-      prisma.userSummary.findMany({
-        include: {
-          _count: {
-            select: { contacts: true },
-          },
-          contacts: {
-            orderBy: { start_date: "desc" },
-            select: { start_date: true },
-            take: 1,
-          },
+    const fetchPromise = prisma.userSummary.findMany({
+      include: {
+        _count: {
+          select: { contacts: true },
         },
-        orderBy,
-        skip,
-        take: limit,
-        where,
-      }),
-      prisma.userSummary.count({ where }),
+        contacts: {
+          orderBy: { start_date: "desc" },
+          select: { start_date: true },
+          take: 1,
+        },
+      },
+      orderBy,
+      skip: skipConfig,
+      take: takeConfig,
+      where,
+    });
+
+    const [allUsers, baseCount] = await Promise.all([
+      fetchPromise,
+      isCustomFilterActive ? Promise.resolve(0) : prisma.userSummary.count({ where }),
     ]);
 
+    let filteredUsers = allUsers as any[];
+
+    if (isCustomFilterActive && filterCol && filterOp && filterVal) {
+      filteredUsers = allUsers.filter((u) => {
+        let cellValue: any = null;
+
+        if (filterCol === "contacts") {
+          cellValue = u._count?.contacts || 0;
+        } else if (filterCol === "last_contact") {
+          cellValue = u.contacts?.[0]?.start_date?.getTime() || null;
+        } else if (filterCol === "mp") {
+          cellValue = u.mp;
+        } else {
+          cellValue = u[filterCol as keyof typeof u];
+        }
+
+        if (filterCol === "mp") {
+          const boolVal = filterVal === "true";
+          return filterOp === "eq" ? cellValue === boolVal : true;
+        }
+        
+        const stringColumns = ["name", "surname", "email", "country", "phone"];
+        if (stringColumns.includes(filterCol)) {
+          const strCell = String(cellValue || "").toLowerCase();
+          const strVal = String(filterVal).toLowerCase();
+          if (filterOp === "contains") return strCell.includes(strVal);
+          if (filterOp === "eq") return strCell === strVal;
+          return true;
+        }
+
+        if (filterCol === "last_contact" || filterCol === "created_at") {
+          if (!filterVal || cellValue === null) return false;
+          
+          let actualTime = cellValue;
+          if (filterCol === "created_at") {
+             actualTime = new Date(cellValue).getTime();
+          }
+
+          const dateObjStart = new Date(filterVal + "T00:00:00");
+          const dateValStart = dateObjStart.getTime();
+          const dateValEnd = dateValStart + 86400000;
+          
+          switch (filterOp) {
+            case "eq": return actualTime >= dateValStart && actualTime < dateValEnd;
+            case "gt": return actualTime >= dateValEnd;
+            case "lt": return actualTime < dateValStart;
+            case "gte": return actualTime >= dateValStart;
+            case "lte": return actualTime < dateValEnd;
+            default: return true;
+          }
+        }
+
+        const numCell = Number(cellValue);
+        const numVal = Number(filterVal);
+        
+        if (isNaN(numCell) || isNaN(numVal)) return true;
+
+        switch (filterOp) {
+          case "eq": return numCell === numVal;
+          case "gt": return numCell > numVal;
+          case "lt": return numCell < numVal;
+          case "gte": return numCell >= numVal;
+          case "lte": return numCell <= numVal;
+          default: return true;
+        }
+      });
+    }
+
+    const finalTotalCount = isCustomFilterActive ? filteredUsers.length : baseCount;
+    const paginatedUsers = isCustomFilterActive ? filteredUsers.slice(skip, skip + limit) : filteredUsers;
+
     return {
-      totalCount,
-      totalPages: Math.ceil(totalCount / limit),
-      users,
+      totalCount: finalTotalCount,
+      totalPages: Math.ceil(finalTotalCount / limit),
+      users: paginatedUsers,
     };
   } catch (error) {
     console.error("Error al obtener usuarios de la base principal:", error);

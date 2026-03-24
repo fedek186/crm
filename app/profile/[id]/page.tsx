@@ -61,7 +61,7 @@ export default async function ProfilePage({ params }: Props) {
                 <span className="text-white font-medium text-sm">{user.country || 'N/A'}</span>
               </div>
               <div>
-                <span className="text-lux-sec text-[11px] blCock uppercase tracking-wider font-semibold mb-1">Mercado Pago (MP)</span>
+                 <span className="text-lux-sec text-[11px] block uppercase tracking-wider font-semibold mb-1">Mercado Pago (MP)</span>
                 <span className="text-white font-medium text-sm">{user.mp ? 'Sí, activado' : 'No'}</span>
               </div>
             </div>

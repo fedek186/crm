@@ -20,6 +20,7 @@ import SearchTableInput from "./components/SearchTableInput";
 import SortableHeader from "./components/SortableHeader";
 import Pagination from "./components/Pagination";
 import SyncButton from "./components/SyncButton";
+import UserFilters from "./components/UserFilters";
 
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
   await requireAuthenticatedAdminPage();
@@ -30,12 +31,19 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const sort = searchParams.sort || "created_at";
   const dir = searchParams.dir === "asc" ? false : true; // true implies desc by default
 
+  const filterCol = searchParams.filterCol;
+  const filterOp = searchParams.filterOp;
+  const filterVal = searchParams.filterVal;
+
   const { users, totalPages } = await getUsersFromNeon({
     page,
     limit: 50,
     search,
     sortBy: sort,
-    sortDesc: dir
+    sortDesc: dir,
+    filterCol,
+    filterOp,
+    filterVal
   });
 
   return (
@@ -55,6 +63,8 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
             </form>
           </div>
         </div>
+
+        <UserFilters />
 
         <div className="bg-lux-surface rounded-xl shadow-2xl border border-lux-hover/40 overflow-hidden mb-8">
           <div className="overflow-x-auto">
