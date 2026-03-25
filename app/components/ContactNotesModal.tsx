@@ -49,7 +49,12 @@ export default function ContactNotesModal({ contactId, userId, notesText }: Cont
   };
 
   return (
-    <dialog id={`notes_modal_${contactId}`} className="modal">
+    <dialog 
+      id={`notes_modal_${contactId}`} 
+      className="modal"
+      onKeyDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       <div className="modal-box bg-lux-bg border border-lux-hover/40 text-left text-lux-text w-11/12 max-w-2xl relative shadow-2xl flex flex-col p-0 cursor-default">
         <div className="p-6 pb-4 border-b border-lux-hover/40 flex justify-between items-center">
           <h3 className="font-bold text-xl text-white tracking-tight">Notas del Contacto</h3>

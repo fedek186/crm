@@ -16,12 +16,31 @@ import { getOptionalAuthContext } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 import { redirect } from "next/navigation";
 import KanbanBoard from "@/app/components/kanban/KanbanBoard";
+import KanbanDateFilter from "@/app/components/kanban/KanbanDateFilter";
 
-export default async function ContactsPage() {
+export default async function ContactsPage(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
   const authContext = await getOptionalAuthContext();
   if (!authContext?.isAdmin) return redirect("/login");
 
+  const searchParams = (await props.searchParams) || {};
+  const from = searchParams.from;
+  const to = searchParams.to;
+
+  const whereClause: any = {};
+  if (from || to) {
+    whereClause.start_date = {};
+    if (from) {
+      whereClause.start_date.gte = new Date(from);
+    }
+    if (to) {
+      const toDate = new Date(to);
+      toDate.setHours(23, 59, 59, 999);
+      whereClause.start_date.lte = toDate;
+    }
+  }
+
   const contacts = await prisma.contacts.findMany({
+    where: whereClause,
     include: {
       user: true,
     },
@@ -47,12 +66,16 @@ export default async function ContactsPage() {
         <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
           Tablero de <span className="text-lux-gold">Contactos</span>
         </h1>
-        <p className="text-lux-muted text-sm mb-8">
+        <p className="text-lux-muted text-sm mb-6">
           Gestiona y ordena los estados de interacción con los usuarios libremente.
         </p>
+        
+        <KanbanDateFilter />
 
         {/* Client component para manejar el Drag and Drop */}
-        <KanbanBoard initialContacts={processedContacts as any} />
+        <div className="w-full">
+           <KanbanBoard initialContacts={processedContacts as any} />
+        </div>
       </div>
     </div>
   );
