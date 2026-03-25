@@ -106,6 +106,7 @@ export default async function ProfilePage({ params }: Props) {
                     userId={user.user_id as string}
                     numero={user.contacts.length - i}
                     objetivo={c.objective}
+                    media={c.media}
                     fechaInicio={c.start_date}
                     fechaFin={c.end_date}
                     estado={c.state}
