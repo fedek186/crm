@@ -33,7 +33,7 @@ export default async function Header() {
                 <Link href="/" className="hover:text-lux-gold transition-colors cursor-pointer">Usuarios</Link>
                 <Link href="/transactions" className="hover:text-lux-gold transition-colors cursor-pointer">Transacciones</Link>
                 <Link href="/merchants" className="hover:text-lux-gold transition-colors cursor-pointer">Merchants</Link>
-                <a className="hover:text-lux-gold transition-colors cursor-pointer hidden sm:block">Reportes</a>
+                <Link href="/contacts" className="hover:text-lux-gold transition-colors cursor-pointer">Contactos</Link>
                 <a className="hover:text-lux-gold transition-colors cursor-pointer">Ajustes</a>
                 <form action={signOut}>
                   <button className="hover:text-lux-gold transition-colors cursor-pointer" type="submit">

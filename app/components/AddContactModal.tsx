@@ -22,6 +22,7 @@ export default function AddContactModal({ userId }: { userId: string }) {
     const form = e.currentTarget;
     const formData = new FormData(form);
     formData.append("userId", userId);
+    formData.append("state","contacted");
     
     const result = await addContactAction(formData);
     if (result?.success) {
@@ -47,17 +48,6 @@ export default function AddContactModal({ userId }: { userId: string }) {
           <h3 className="font-bold text-xl mb-6 text-lux-gold border-b border-lux-hover/30 pb-3">Añadir Nuevo Contacto</h3>
           
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="label">
-                <span className="label-text text-lux-sec font-semibold tracking-wide uppercase text-xs">Estado</span>
-              </label>
-              <select name="state" className="select select-bordered w-full bg-lux-bg text-white border-lux-hover/30 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold" required defaultValue="contacted">
-                <option value="contacted">Contactado</option>
-                <option value="talking">En conversación</option>
-                <option value="finalizado">Finalizado</option>
-              </select>
-            </div>
-
             <div>
               <label className="label">
                 <span className="label-text text-lux-sec font-semibold tracking-wide uppercase text-xs">Objetivo</span>

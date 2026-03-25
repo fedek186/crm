@@ -109,7 +109,7 @@ export default async function ProfilePage({ params }: Props) {
                     fechaInicio={c.start_date}
                     fechaFin={c.end_date}
                     estado={c.state}
-                    notesData={c.notes}
+                    notesText={c.notes}
                   />
                 ))
               ) : (

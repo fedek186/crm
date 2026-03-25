@@ -402,11 +402,6 @@ export async function getUserProfile(userId: string) {
     const user = await prisma.userSummary.findUnique({
       include: {
         contacts: {
-          include: {
-            notes: {
-              orderBy: { date: "desc" },
-            },
-          },
           orderBy: { start_date: "desc" },
         },
       },

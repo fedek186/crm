@@ -32,6 +32,7 @@ enum ContactState {
   contacted
   talking
   finalizado
+  no_response
 }
 
 enum ContactObjective {
@@ -46,34 +47,26 @@ enum media {
 }
 
 model contacts {
-  id         Int               @id @default(autoincrement())
-  user_id    String?
-  state      ContactState      @default(contacted)
-  start_date DateTime?         @default(now()) @db.Timestamp(6)
-  end_date   DateTime?         @db.Timestamp(6)
-  objective  ContactObjective?
-  media      media?
-  user       userSummary?      @relation(fields: [user_id], references: [user_id])
-  notes      notes[]
-}
-
-model notes {
-  id         Int       @id @default(autoincrement())
-  contact_id Int
-  text       String?
-  title      String?
-  date       DateTime? @default(now()) @db.Timestamp(6)
-  contact    contacts? @relation(fields: [contact_id], references: [id])
+  id          Int               @id @default(autoincrement())
+  user_id     String?
+  state       ContactState      @default(contacted)
+  start_date  DateTime?         @default(now()) @db.Timestamp(6)
+  end_date    DateTime?         @db.Timestamp(6)
+  objective   ContactObjective?
+  media       media?
+  notes       String?
+  board_order Float             @default(0)
+  user        userSummary?      @relation(fields: [user_id], references: [user_id])
 }
 
 model Merchant {
-  id         String   @id @default(uuid()) @db.Uuid
+  id         String    @id @default(uuid()) @db.Uuid
   name       String
   domain     String?
   logo_url   String?
-  aliases    String[] @default([])
-  created_at DateTime @default(now()) @db.Timestamp(6)
-  updated_at DateTime @updatedAt @db.Timestamp(6)
+  aliases    String[]  @default([])
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime  @updatedAt @db.Timestamp(6)
   deleted_at DateTime? @db.Timestamp(6)
 
   @@map("merchants")
