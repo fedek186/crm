@@ -13,13 +13,11 @@ Este archivo renderiza la pantalla principal de usuarios del panel de administra
 */
 
 import Link from "next/link";
-import getSupabaseData from "./actions/supabaseActions";
 import { requireAuthenticatedAdminPage } from "./lib/auth";
 import { getUsersFromNeon } from "./services/userService";
 import SearchTableInput from "./components/SearchTableInput";
 import SortableHeader from "./components/SortableHeader";
 import Pagination from "./components/Pagination";
-import SyncButton from "./components/SyncButton";
 import UserFilters from "./components/UserFilters";
 import { prisma } from "./lib/prisma";
 
@@ -47,21 +45,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     filterVal
   });
 
-  const lastSync = await prisma.refreshRuns.findFirst({
-    orderBy: {
-      date: 'desc'
-    }
-  });
 
-  const lastSyncDateStr = lastSync?.date 
-    ? lastSync.date.toLocaleString('es-AR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    : "Nunca";
 
   return (
     <div className="min-h-screen bg-lux-bg text-lux-text p-6 md:p-12 selection:bg-lux-gold selection:text-lux-bg">
@@ -75,9 +59,6 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
           
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
             <SearchTableInput />
-            <form action={getSupabaseData} className="w-full sm:w-auto">
-              <SyncButton lastSyncDate={lastSyncDateStr} />
-            </form>
           </div>
         </div>
 

@@ -59,7 +59,7 @@ model contacts {
   user        userSummary?      @relation(fields: [user_id], references: [user_id])
 }
 
-model Merchant {
+model merchant {
   id         String    @id @default(uuid()) @db.Uuid
   name       String
   domain     String?
@@ -70,4 +70,16 @@ model Merchant {
   deleted_at DateTime? @db.Timestamp(6)
 
   @@map("merchants")
+}
+
+model metric_daily {
+  id                               Int      @id @default(autoincrement())
+  date                             DateTime @unique @default(now()) @db.Timestamp(6)
+  total_users                      Int?
+  new_users                        Int?
+  active_users_7d                  Int?
+  total_transactions               Int?
+  new_transactions                 Int?
+  avg_transactions_per_user        Float?
+  avg_transactions_per_active_user Float?
 }

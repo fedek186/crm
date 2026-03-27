@@ -14,6 +14,7 @@ Funciones exportadas:
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import Link from "next/link";
 import ContactNotesModal from "../ContactNotesModal";
 
 export default function KanbanCard({ contact }: { contact: any }) {
@@ -73,7 +74,13 @@ export default function KanbanCard({ contact }: { contact: any }) {
     >
       <div className="flex justify-between items-start mb-3">
         <h4 className="text-white font-bold text-sm leading-tight pr-2">
-          {name}
+          <Link
+            href={`/profile/${contact.user_id}`}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="hover:text-lux-gold transition-colors z-10 relative pointer-events-auto cursor-pointer"
+          >
+            {name}
+          </Link>
         </h4>
         <span className="text-lux-gold text-xs font-bold shrink-0">#{contact.numero}</span>
       </div>

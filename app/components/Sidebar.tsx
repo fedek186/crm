@@ -94,7 +94,7 @@ export default function Sidebar() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-6 flex flex-col gap-8">
+      <div className="flex-1 overflow-visible py-6 flex flex-col gap-8">
         {navGroups.map((group, idx) => (
           <div key={idx} className="flex flex-col gap-2">
             {!isMinimized ? (
@@ -122,7 +122,6 @@ export default function Sidebar() {
                         }
                         ${isMinimized ? "justify-center p-0" : "px-4"}
                       `}
-                      title={isMinimized ? item.name : undefined}
                       aria-current={isActive ? 'page' : undefined}
                     >
                       <span className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-lux-gold" : "text-lux-muted group-hover:text-lux-sec"}`}>
@@ -137,7 +136,7 @@ export default function Sidebar() {
 
                       {/* Tooltip on right side when minimized via CSS */}
                       {isMinimized && (
-                        <div className="absolute left-16 px-3 py-1.5 bg-lux-surface ring-1 ring-white/10 text-white text-xs font-medium rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-xl pointer-events-none">
+                        <div className="absolute left-16 px-3 py-1.5 bg-lux-surface ring-1 ring-white/10 text-white text-xs font-medium rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-[9999] shadow-xl pointer-events-none">
                           {item.name}
                         </div>
                       )}
