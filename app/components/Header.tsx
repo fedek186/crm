@@ -21,19 +21,16 @@ export default async function Header() {
   const isAdmin = authContext?.isAdmin ?? false;
 
   return (
-    <div className="w-full bg-lux-bg border-b border-lux-hover/40 px-6 md:px-12 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div className="flex-1">
+    <div className="w-full bg-lux-bg border-b border-lux-hover/40 px-6 md:px-12 h-[73px] flex justify-between items-center sticky top-0 z-50">
+        <div className="flex-1 lg:hidden">
             <Link href="/" className="text-white font-bold text-xl tracking-tight cursor-pointer">
               Piggy <span className="text-lux-gold">Admin</span>
             </Link>
         </div>
+        <div className="flex-1 hidden lg:block"></div>
         <div className="flex-none flex items-center gap-6 text-sm font-medium text-lux-sec">
             {isAdmin ? (
               <>
-                <Link href="/" className="hover:text-lux-gold transition-colors cursor-pointer">Usuarios</Link>
-                <Link href="/transactions" className="hover:text-lux-gold transition-colors cursor-pointer">Transacciones</Link>
-                <Link href="/merchants" className="hover:text-lux-gold transition-colors cursor-pointer">Merchants</Link>
-                <Link href="/contacts" className="hover:text-lux-gold transition-colors cursor-pointer">Contactos</Link>
                 <a className="hover:text-lux-gold transition-colors cursor-pointer">Ajustes</a>
                 <form action={signOut}>
                   <button className="hover:text-lux-gold transition-colors cursor-pointer" type="submit">

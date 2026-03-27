@@ -21,6 +21,7 @@ import SortableHeader from "./components/SortableHeader";
 import Pagination from "./components/Pagination";
 import SyncButton from "./components/SyncButton";
 import UserFilters from "./components/UserFilters";
+import { prisma } from "./lib/prisma";
 
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
   await requireAuthenticatedAdminPage();
@@ -46,6 +47,22 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
     filterVal
   });
 
+  const lastSync = await prisma.refreshRuns.findFirst({
+    orderBy: {
+      date: 'desc'
+    }
+  });
+
+  const lastSyncDateStr = lastSync?.date 
+    ? lastSync.date.toLocaleString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : "Nunca";
+
   return (
     <div className="min-h-screen bg-lux-bg text-lux-text p-6 md:p-12 selection:bg-lux-gold selection:text-lux-bg">
       <div className="max-w-[1600px] mx-auto">
@@ -59,7 +76,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
             <SearchTableInput />
             <form action={getSupabaseData} className="w-full sm:w-auto">
-              <SyncButton />
+              <SyncButton lastSyncDate={lastSyncDateStr} />
             </form>
           </div>
         </div>

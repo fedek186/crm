@@ -15,6 +15,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import "./styles/globals.css";
 import Header from "./components/Header";
+import SidebarWrapper from "./components/SidebarWrapper";
 
 export const metadata: Metadata = {
   title: "Piggy Admin",
@@ -28,11 +29,18 @@ export default function RootLayout({
 }>) {
   return (
     <html data-theme="piggy" lang="en">
-      <body className="antialiased">
-        <Suspense fallback={<div className="h-[73px] flex items-center px-6 md:px-12 bg-lux-bg border-b border-lux-hover/40"><span className="text-white font-bold text-xl tracking-tight">Piggy <span className="text-lux-gold">Admin</span></span></div>}>
-          <Header />
+      <body className="antialiased flex h-screen bg-lux-bg text-lux-text overflow-hidden">
+        <Suspense fallback={<div className="w-64 bg-lux-surface border-r border-lux-hover/40 flex-shrink-0 h-full" />}>
+          <SidebarWrapper />
         </Suspense>
-        {children}
+        <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0 relative">
+          <Suspense fallback={<div className="h-[73px] flex items-center px-6 md:px-12 bg-lux-bg border-b border-lux-hover/40"><span className="text-white font-bold text-xl tracking-tight">Piggy <span className="text-lux-gold">Admin</span></span></div>}>
+            <Header />
+          </Suspense>
+          <main className="flex-1 overflow-x-hidden overflow-y-auto min-h-0 bg-lux-bg">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
