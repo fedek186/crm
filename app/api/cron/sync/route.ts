@@ -18,10 +18,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { createClient } from "@supabase/supabase-js";
 
+export const dynamic = 'force-dynamic'; // Foco importante para evitar que Vercel cachee esta URL
+export const maxDuration = 60; // Damos 60 segundos por si Supabase/Prisma demoran
+
 export async function GET(request: Request) {
+  console.log("CRON: Petición entrante desde:", request.headers.get("user-agent"));
+
   // 1. Verificación Estricta para evitar ejecuciones externas
   const authHeader = request.headers.get("authorization");
   if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    console.error("CRON: Acceso denegado. Token inválido o no enviado. Header recibido:", authHeader);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
