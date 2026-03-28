@@ -10,7 +10,7 @@ const ACCESS_TOKEN_MAX_AGE = 60 * 60;
 const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 30;
 
 function isPublicPath(pathname: string): boolean {
-  return pathname === "/login" || pathname.startsWith("/api/public");
+  return pathname === "/login" || pathname.startsWith("/api/public") || pathname.startsWith("/api/cron");
 }
 
 function getCookieOptions(maxAge: number) {
