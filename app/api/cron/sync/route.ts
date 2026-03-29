@@ -55,9 +55,9 @@ export async function GET(request: Request) {
         .from("transactions")
         .select("id, user_id, date")
         .range(from, from + limit - 1);
-      
+
       if (error) throw new Error(error.message);
-      
+
       if (data && data.length > 0) {
         allTransactions = allTransactions.concat(data);
         from += limit;
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
     const { data: usersData, error: usrErr } = await supabase.from("users").select(`
       id, email, name, surname, phone, country, created_at, user_integrations(id)
     `);
-    
+
     if (usrErr) throw new Error(usrErr.message);
 
     // === PASO 2: CONSTRUCCIÓN Y ACTUALIZACIÓN DEL USER SUMMARY ===
@@ -84,7 +84,7 @@ export async function GET(request: Request) {
     const formattedPrismaSummary = (usersData || []).map((u: any) => {
       let daily = 0, week = 0, month = 0;
       const hasMP = Boolean(u.user_integrations?.length);
-      
+
       // Contar sus transacciones filtrando del pool gigante por userId
       const userTx = allTransactions.filter((tx) => tx.user_id === u.id);
       for (const tx of userTx) {
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
     const dayEnd = new Date(now);
     dayEnd.setUTCHours(0, 0, 0, 0);       // Empezar a media noche (hoy en UTC)
     dayEnd.setMilliseconds(-1);           // Mover un milisegundo al pasado (23:59:59.999 UTC de Ayer)
-    
+
     const dayStart = new Date(dayEnd);
     dayStart.setUTCHours(0, 0, 0, 0);     // (00:00:00.000 UTC de Ayer)
 

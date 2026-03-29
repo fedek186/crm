@@ -46,7 +46,7 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
   // Format dates for charts
   const chartData = data.map((d) => ({
     ...d,
-    formattedDate: new Date(d.date).toLocaleDateString("es-AR", { month: "short", day: "numeric" }),
+    formattedDate: new Date(d.date).toLocaleDateString("es-AR", { month: "short", day: "numeric", timeZone: 'UTC' }),
     // Ensure missing data falls back to 0 for charts
     total_users: d.total_users || 0,
     new_users: d.new_users || 0,
@@ -59,13 +59,15 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-lux-bg border border-lux-hover/80 p-3 flex flex-col gap-1 rounded shadow-xl text-sm z-50">
-          <p className="text-white font-medium mb-1 border-b border-lux-hover/40 pb-1">{label}</p>
+        <div className="bg-lux-surface/90 backdrop-blur-md border border-lux-hover/60 p-4 flex flex-col gap-3 rounded-xl shadow-2xl text-sm z-50 min-w-[160px]">
+          <p className="text-white font-semibold opacity-90 mb-1 border-b border-lux-hover/50 pb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }}></span>
-              <span className="text-lux-sec font-light">{entry.name}:</span>
-              <span className="text-white font-medium">{entry.value}</span>
+            <div key={index} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_currentColor]" style={{ backgroundColor: entry.color, color: entry.color }}></span>
+                <span className="text-lux-sec font-medium">{entry.name}</span>
+              </div>
+              <span className="text-white font-bold">{entry.value}</span>
             </div>
           ))}
         </div>
@@ -84,41 +86,41 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
         </h3>
         <div className="h-[300px] md:h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#818cf8" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#a8883d" stopOpacity={0.4} /> {/* lux-gold */}
-                  <stop offset="95%" stopColor="#a8883d" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#fbbf24" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff0a" vertical={false} />
-              <XAxis dataKey="formattedDate" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickMargin={10} />
-              <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickMargin={10} />
-              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20', strokeWidth: 1 }} />
-              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '15px' }} />
+              <CartesianGrid strokeDasharray="4 4" stroke="#ffffff08" vertical={false} />
+              <XAxis dataKey="formattedDate" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} />
+              <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff10', strokeWidth: 2 }} />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '20px' }} />
               <Area
                 type="monotone"
                 dataKey="total_users"
                 name="Usuarios Totales"
-                stroke="#6366f1"
+                stroke="#818cf8"
                 fillOpacity={1}
                 fill="url(#colorTotal)"
-                strokeWidth={2}
-                activeDot={{ r: 6, strokeWidth: 0 }}
+                strokeWidth={3}
+                activeDot={{ r: 7, strokeWidth: 0, fill: "#6366f1" }}
               />
               <Area
                 type="monotone"
                 dataKey="active_users_7d"
                 name="Usuarios Activos (7d)"
-                stroke="#a8883d"
+                stroke="#fbbf24"
                 fillOpacity={1}
                 fill="url(#colorActive)"
-                strokeWidth={2}
-                activeDot={{ r: 6, strokeWidth: 0 }}
+                strokeWidth={3}
+                activeDot={{ r: 7, strokeWidth: 0, fill: "#f59e0b" }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -134,14 +136,14 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
           </h3>
           <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff0a" vertical={false} />
-                <XAxis dataKey="formattedDate" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickMargin={10} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickMargin={10} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff08' }} />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '15px' }} />
-                <Bar dataKey="new_users" name="Nuevos Usuarios" fill="#64748b" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                <Bar dataKey="new_transactions" name="Nuevas Trans." fill="#a8883d" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              <BarChart data={chartData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" stroke="#ffffff08" vertical={false} />
+                <XAxis dataKey="formattedDate" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05' }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '20px' }} />
+                <Bar dataKey="new_users" name="Nuevos Usuarios" fill="#818cf8" radius={[6, 6, 0, 0]} maxBarSize={30} />
+                <Bar dataKey="new_transactions" name="Nuevas Trans." fill="#fbbf24" radius={[6, 6, 0, 0]} maxBarSize={30} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -155,29 +157,29 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
           </h3>
           <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff0a" vertical={false} />
-                <XAxis dataKey="formattedDate" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickMargin={10} />
-                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickMargin={10} />
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff20', strokeWidth: 1, strokeDasharray: '3 3' }} />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '15px' }} />
+              <LineChart data={chartData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" stroke="#ffffff08" vertical={false} />
+                <XAxis dataKey="formattedDate" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#ffffff10', strokeWidth: 2, strokeDasharray: '4 4' }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '20px' }} />
                 <Line
                   type="monotone"
                   dataKey="avg_transactions_per_active_user"
                   name="Tx / Usuario Activo"
-                  stroke="#14b8a6"
+                  stroke="#10b981"
                   strokeWidth={3}
-                  dot={{ r: 3, fill: "#14b8a6", strokeWidth: 0 }}
-                  activeDot={{ r: 6, strokeWidth: 0 }}
+                  dot={{ r: 4, fill: "#10b981", strokeWidth: 0 }}
+                  activeDot={{ r: 7, strokeWidth: 0, fill: "#059669" }}
                 />
                 <Line
                   type="monotone"
                   dataKey="avg_transactions_per_user"
                   name="Tx / Usuario (Global)"
                   stroke="#64748b"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, strokeWidth: 0 }}
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: "#64748b", strokeWidth: 0 }}
+                  activeDot={{ r: 7, strokeWidth: 0, fill: "#475569" }}
                 />
               </LineChart>
             </ResponsiveContainer>
