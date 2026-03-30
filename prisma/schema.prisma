@@ -61,7 +61,6 @@ model contacts {
   objective   ContactObjective?
   media       media?
   notes       String?
-  result      result?
   board_order Float             @default(0)
   user        userSummary?      @relation(fields: [user_id], references: [user_id])
 }
