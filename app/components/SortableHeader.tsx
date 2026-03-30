@@ -24,7 +24,7 @@ export default function SortableHeader({ title, column }: Props) {
     params.set("dir", newDir);
 
     startTransition(() => {
-      router.push(`/?${params.toString()}`, { scroll: false });
+      router.push(`/users/?${params.toString()}`, { scroll: false });
     });
   };
 

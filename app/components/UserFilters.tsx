@@ -99,9 +99,8 @@ export default function UserFilters() {
     }
     
     params.set("page", "1"); // Volver a pág 1 al filtrar
-
     startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      router.push(`${pathname}/users?${params.toString()}`, { scroll: false });
     });
   };
 
@@ -114,7 +113,7 @@ export default function UserFilters() {
     params.set("page", "1");
 
     startTransition(() => {
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      router.push(`${pathname}/users?${params.toString()}`, { scroll: false });
     });
   };
 

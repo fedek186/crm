@@ -46,6 +46,12 @@ enum media {
   email
 }
 
+enum result {
+  fail
+  success
+}
+
+
 model contacts {
   id          Int               @id @default(autoincrement())
   user_id     String?
@@ -55,6 +61,7 @@ model contacts {
   objective   ContactObjective?
   media       media?
   notes       String?
+  result      result?
   board_order Float             @default(0)
   user        userSummary?      @relation(fields: [user_id], references: [user_id])
 }
