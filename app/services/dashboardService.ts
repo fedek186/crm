@@ -9,14 +9,20 @@ Funciones exportadas:
 - getDashboardMetrics: Obtiene las métricas de los últimos X días, ordenadas por fecha de manera ascendente para ser dibujadas en los gráficos. Devuelve también el último registro como referencia rápida.
 */
 import { prisma } from "../lib/prisma";
+import type { Prisma } from "@prisma/client";
 
 export async function getDashboardMetrics(days = 30) {
-  const metrics = await prisma.metric_daily.findMany({
-    take: days,
+  const query: Prisma.metric_dailyFindManyArgs = {
     orderBy: {
       date: 'desc',
     },
-  });
+  };
+  
+  if (days > 0) {
+    query.take = days;
+  }
+
+  const metrics = await prisma.metric_daily.findMany(query);
 
   // Revert order for chart display (oldest to newest)
   const chartData = metrics.reverse();

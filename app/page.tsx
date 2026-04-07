@@ -29,7 +29,7 @@ const DashboardCharts = dynamic(() => import("./components/DashboardCharts"), {
 });
 
 export default async function Page() {
-  const { chartData, latestMetric, previousMetric } = await getDashboardMetrics(30);
+  const { chartData, latestMetric, previousMetric } = await getDashboardMetrics(0);
 
 
 

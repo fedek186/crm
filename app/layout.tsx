@@ -1,15 +1,17 @@
 /*
 Este archivo define el diseño principal (RootLayout) de la aplicación, envolviendo
-todas las páginas. Configura el HTML base, provee los estilos globales e incluye
-el componente Header con un límite de Suspense para optimizar el renderizado inicial y streaming HTML.
+todas las páginas. Configura el HTML base integrando el patrón de estructura '.drawer'
+de DaisyUI, aislando así el menú lateral responsivo (SidebarWrapper) del contenedor de contenido principal
+de forma tal que al visualizarse en dispositivos móviles se oculte sin desplazar los elementos.
 
 Elementos externos:
 - Metadata: tipo de Next.js para definir los metadatos base de la aplicación.
 - Suspense: componente de React que muestra un fallback mientras los componentes hijos cargan de forma asíncrona.
-- Header: cabecera principal de navegación de la aplicación.
+- Header: cabecera principal de navegación de la aplicación con controles de drawer en formato móvil.
+- SidebarWrapper: Renderiza el contenedor de la navegación y envuelve el comportamiento Client de Sidebar.
 
 Funciones exportadas:
-- RootLayout: renderiza la estructura principal de la aplicación, el encabezado envuelto en Suspense y las páginas anidadas.
+- RootLayout: renderiza la estructura Drawer base de la aplicación y pre-monta los componentes fijos.
 */
 import type { Metadata } from "next";
 import { Suspense } from "react";
