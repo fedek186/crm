@@ -29,17 +29,25 @@ export default function RootLayout({
 }>) {
   return (
     <html data-theme="piggy" lang="en">
-      <body className="antialiased flex h-screen bg-lux-bg text-lux-text overflow-hidden">
-        <Suspense fallback={<div className="w-64 bg-lux-surface border-r border-lux-hover/40 flex-shrink-0 h-full" />}>
-          <SidebarWrapper />
-        </Suspense>
-        <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0 relative">
-          <Suspense fallback={<div className="h-[73px] flex items-center px-6 md:px-12 bg-lux-bg border-b border-lux-hover/40"><span className="text-white font-bold text-xl tracking-tight">Piggy <span className="text-lux-gold">Admin</span></span></div>}>
-            <Header />
-          </Suspense>
-          <main className="flex-1 overflow-x-hidden overflow-y-auto min-h-0 bg-lux-bg">
-            {children}
-          </main>
+      <body className="antialiased h-screen bg-lux-bg text-lux-text overflow-hidden">
+        <div className="drawer lg:drawer-open h-full">
+          <input id="mobile-sidebar" type="checkbox" className="drawer-toggle" />
+          
+          <div className="drawer-content flex flex-col h-full overflow-hidden min-w-0 relative">
+            <Suspense fallback={<div className="h-[73px] flex items-center px-6 md:px-12 bg-lux-bg border-b border-lux-hover/40"><span className="text-white font-bold text-xl tracking-tight">Piggy <span className="text-lux-gold">Admin</span></span></div>}>
+              <Header />
+            </Suspense>
+            <main className="flex-1 overflow-x-hidden overflow-y-auto min-h-0 bg-lux-bg">
+              {children}
+            </main>
+          </div>
+          
+          <div className="drawer-side z-[70]">
+            <label htmlFor="mobile-sidebar" aria-label="close sidebar" className="drawer-overlay"></label>
+            <Suspense fallback={<div className="w-64 bg-lux-surface border-r border-lux-hover/40 flex-shrink-0 h-full" />}>
+              <SidebarWrapper />
+            </Suspense>
+          </div>
         </div>
       </body>
     </html>

@@ -53,6 +53,13 @@ export default function Sidebar() {
     setMounted(true);
   }, []);
 
+  const closeDrawerOnMobile = () => {
+    const drawerInput = document.getElementById("mobile-sidebar") as HTMLInputElement | null;
+    if (drawerInput && drawerInput.checked) {
+      drawerInput.checked = false;
+    }
+  };
+
   const navGroups = [
         {
       title: "Dashboard",
@@ -97,7 +104,7 @@ export default function Sidebar() {
         
         <button 
           onClick={() => setIsMinimized(!isMinimized)}
-          className={`p-2 rounded-lg bg-lux-hover/20 hover:bg-lux-hover/80 text-lux-sec hover:text-white transition-colors flex-shrink-0 ${isMinimized ? "mx-auto" : ""}`}
+          className={`hidden lg:flex p-2 rounded-lg bg-lux-hover/20 hover:bg-lux-hover/80 text-lux-sec hover:text-white transition-colors flex-shrink-0 ${isMinimized ? "mx-auto" : ""}`}
           title={isMinimized ? "Expandir menú" : "Minimizar menú"}
         >
           {isMinimized ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -125,12 +132,13 @@ export default function Sidebar() {
                   <li key={item.name}>
                     <Link
                       href={item.href}
+                      onClick={closeDrawerOnMobile}
                       className={`relative flex items-center h-12 rounded-lg transition-all duration-200 group
                         ${isActive 
                            ? "bg-lux-gold/15 text-lux-gold font-medium active:bg-lux-gold/20" 
                            : "text-lux-sec hover:bg-lux-hover/50 hover:text-white"
                         }
-                        ${isMinimized ? "justify-center p-0" : "px-4"}
+                        ${isMinimized ? "justify-center p-0 lg:justify-center" : "px-4"}
                       `}
                       aria-current={isActive ? 'page' : undefined}
                     >

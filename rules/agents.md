@@ -85,8 +85,13 @@ Cada vez que un Agente de IA interactúe con este repositorio, **DEBE CUMPLIR** 
       - signOut: cierra la sesión del usuario tanto en la app como en el proveedor de autenticación.
       */
 
+7. **Estilos**:
+   - Es fundamental que sigas la capa de estilos y estetica de la pantalla y el proyecto en general. Para eso eso no dudes en consultar los archivos de estilos y componentes existentes. 
+   - Cada vez que realices una screen nueva o un componente en donde se visualice información
+   asegurate que tenga una forma responsive acorde a la pantalla y al componente.
 
-7. **Contexto Antes de Editar**:
+
+8. **Contexto Antes de Editar**:
    - Antes de modificar código, **siempre lee** los componentes o servicios implicados. No asumas que la funcionalidad existe sin verificar primero explorando los archivos.
 
 *Nota para el Agente: Estas prácticas (Next.js App Router, TS estricto, rutas ligeras y optimización de bundle) son requerimientos mandatorios del proyecto.*

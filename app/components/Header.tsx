@@ -22,8 +22,11 @@ export default async function Header() {
 
   return (
     <div className="w-full bg-lux-bg border-b border-lux-hover/40 px-6 md:px-12 h-[73px] flex justify-between items-center sticky top-0 z-50">
-        <div className="flex-1 lg:hidden">
-            <Link href="/" className="text-white font-bold text-xl tracking-tight cursor-pointer">
+        <div className="flex-1 lg:hidden flex items-center gap-3">
+            <label htmlFor="mobile-sidebar" aria-label="open sidebar" className="btn btn-square btn-ghost text-lux-sec hover:text-white hover:bg-lux-hover/40 max-h-10 min-h-10 w-10">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </label>
+            <Link href="/" className="text-white font-bold text-xl tracking-tight cursor-pointer truncate">
               Piggy <span className="text-lux-gold">Admin</span>
             </Link>
         </div>
