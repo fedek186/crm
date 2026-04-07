@@ -49,7 +49,7 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
   const baseChartData = data.map((d, index, array) => {
     const prev = index > 0 ? array[index - 1] : null;
 
-    const calcGrowth = (curr: number | null, prevVal: number | null) => {
+    const calcGrowth = (curr: number | null | undefined, prevVal: number | null | undefined) => {
       if (!prevVal || prevVal === 0) return 0;
       return (((curr || 0) - prevVal) / prevVal) * 100;
     };
