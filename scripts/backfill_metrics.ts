@@ -46,7 +46,7 @@ interface UserRow {
 interface TransactionRow {
   id: string;
   user_id: string;
-  date: string;
+  created_at: string;
 }
 
 async function fetchAllUsers(): Promise<UserRow[]> {
@@ -64,8 +64,8 @@ async function fetchAllTransactions(): Promise<TransactionRow[]> {
   while (keepFetching) {
     const { data, error } = await supabase
       .from("transactions")
-      .select("id, user_id, date")
-      .gte("date", "2025-05-23T00:00:00.000Z") // Filtro solicitado por bug en datos históricos
+      .select("id, user_id, created_at")
+      .gte("created_at", "2025-05-23T00:00:00.000Z") // Filtro solicitado por bug en datos históricos
       .range(from, from + limit - 1);
 
     if (error) throw new Error("Transactions fetch error: " + error.message);
@@ -81,11 +81,37 @@ async function fetchAllTransactions(): Promise<TransactionRow[]> {
   return allData;
 }
 
+async function fetchAllIntegrations(): Promise<{id: string; created_at: string}[]> {
+  let allData: {id: string; created_at: string}[] = [];
+  let from = 0;
+  const limit = 1000;
+  let keepFetching = true;
+
+  while (keepFetching) {
+    const { data, error } = await supabase
+      .from("user_integrations")
+      .select("id, created_at")
+      .range(from, from + limit - 1);
+
+    if (error) throw new Error("Integrations fetch error: " + error.message);
+
+    if (data && data.length > 0) {
+      allData = allData.concat(data);
+      from += limit;
+    } else {
+      keepFetching = false;
+    }
+  }
+
+  return allData;
+}
+
 async function runBackfill() {
   console.log("-> Iniciando extracción desde Supabase...");
   const users = await fetchAllUsers();
   const transactions = await fetchAllTransactions();
-  console.log(`-> Obtuvimos ${users.length} usuarios y ${transactions.length} transacciones.`);
+  const integrations = await fetchAllIntegrations();
+  console.log(`-> Obtuvimos ${users.length} usuarios, ${transactions.length} transacciones y ${integrations.length} integraciones.`);
 
   if (users.length === 0) {
     console.log("No hay usuarios para procesar.");
@@ -101,12 +127,17 @@ async function runBackfill() {
   const parsedTxs = transactions.map((t) => ({
     id: t.id,
     user_id: t.user_id,
-    date: new Date(t.date).getTime(),
+    created_at: new Date(t.created_at).getTime(),
+  }));
+
+  const parsedIntegrations = integrations.map((i) => ({
+    id: i.id,
+    created_at: new Date(i.created_at).getTime(),
   }));
 
   // Encontrar la fecha mínima absoluta para empezar el ciclo histórico
   const minUserDate = Math.min(...parsedUsers.map((u) => u.created_at));
-  const minTxDate = parsedTxs.length > 0 ? Math.min(...parsedTxs.map((t) => t.date)) : minUserDate;
+  const minTxDate = parsedTxs.length > 0 ? Math.min(...parsedTxs.map((t) => t.created_at)) : minUserDate;
   const startTimestamp = Math.min(minUserDate, minTxDate);
 
   // Crear objeto fecha usando el timezone local del server, arrancando a las 00:00:00
@@ -140,17 +171,21 @@ async function runBackfill() {
       (u) => u.created_at >= dayStart.getTime() && u.created_at <= dayEnd.getTime()
     ).length;
 
-    const txsUpToDay = parsedTxs.filter((t) => t.date <= dayEnd.getTime());
+    const txsUpToDay = parsedTxs.filter((t) => t.created_at <= dayEnd.getTime());
     const total_transactions = txsUpToDay.length;
 
     const new_transactions = parsedTxs.filter(
-      (t) => t.date >= dayStart.getTime() && t.date <= dayEnd.getTime()
+      (t) => t.created_at >= dayStart.getTime() && t.created_at <= dayEnd.getTime()
+    ).length;
+
+    const total_integrations = parsedIntegrations.filter(
+      (i) => i.created_at <= dayEnd.getTime()
     ).length;
 
     const activeUsersSet = new Set<string>();
     parsedTxs.forEach((t) => {
       // Activos en últimos 7 días terminando en este día exacto
-      if (t.date > period7DaysAgo.getTime() && t.date <= dayEnd.getTime()) {
+      if (t.created_at > period7DaysAgo.getTime() && t.created_at <= dayEnd.getTime()) {
         activeUsersSet.add(t.user_id);
       }
     });
@@ -169,6 +204,7 @@ async function runBackfill() {
       new_transactions,
       avg_transactions_per_user,
       avg_transactions_per_active_user,
+      total_integrations,
     });
 
     // Avanzamos un día manual

@@ -45,6 +45,7 @@ export async function GET(request: Request) {
 
     // === PASO 1: EXTRAER TODOS LOS DATOS (Usuarios + Transacciones de Supabase) ===
     let allTransactions: any[] = [];
+
     let from = 0;
     const limit = 1000;
     let keepFetching = true;
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
     while (keepFetching) {
       const { data, error } = await supabase
         .from("transactions")
-        .select("id, user_id, date")
+        .select("id, user_id, created_at")
         .range(from, from + limit - 1);
 
       if (error) throw new Error(error.message);
@@ -69,7 +70,7 @@ export async function GET(request: Request) {
     // B) Traer lista final de usuarios y sus integraciones (MP)
     // Para simplificar User Summary, usamos el modelo relacional estándar
     const { data: usersData, error: usrErr } = await supabase.from("users").select(`
-      id, email, name, surname, phone, country, created_at, user_integrations(id)
+      id, email, name, surname, phone, country, created_at, user_integrations(id, created_at)
     `);
 
     if (usrErr) throw new Error(usrErr.message);
@@ -88,8 +89,8 @@ export async function GET(request: Request) {
       // Contar sus transacciones filtrando del pool gigante por userId
       const userTx = allTransactions.filter((tx) => tx.user_id === u.id);
       for (const tx of userTx) {
-        if (!tx.date) continue;
-        const txDate = new Date(tx.date).getTime();
+        if (!tx.created_at) continue;
+        const txDate = new Date(tx.created_at).getTime();
         if (txDate >= startOfToday) daily += 1;
         if (txDate >= sevenDaysAgoWindow) week += 1;
         if (txDate >= thirtyDaysAgoWindow) month += 1;
@@ -138,17 +139,19 @@ export async function GET(request: Request) {
 
     // Parsers para fechas de memoria super-rápidos
     const parsedUsers = (usersData || []).map(u => ({ created_at: new Date(u.created_at).getTime() }));
-    const parsedTxs = allTransactions.map(t => ({ user_id: t.user_id, date: new Date(t.date).getTime() }));
+    const parsedTxs = allTransactions.map(t => ({ user_id: t.user_id, created_at: new Date(t.created_at).getTime() }));
+    const parsedIntegrations = (usersData || []).flatMap((u: any) => u.user_integrations || []).map((i: any) => ({ created_at: new Date(i.created_at).getTime() }));
 
     // Calcular las 7 métricas clave para el día finalizado
     const total_users = parsedUsers.filter(u => u.created_at <= dayEnd.getTime()).length;
     const new_users = parsedUsers.filter(u => u.created_at >= dayStart.getTime() && u.created_at <= dayEnd.getTime()).length;
-    const total_transactions = parsedTxs.filter(t => t.date <= dayEnd.getTime()).length;
-    const new_transactions = parsedTxs.filter(t => t.date >= dayStart.getTime() && t.date <= dayEnd.getTime()).length;
+    const total_transactions = parsedTxs.filter(t => t.created_at <= dayEnd.getTime()).length;
+    const new_transactions = parsedTxs.filter(t => t.created_at >= dayStart.getTime() && t.created_at <= dayEnd.getTime()).length;
+    const total_integrations = parsedIntegrations.filter(i => i.created_at <= dayEnd.getTime()).length;
 
     const activeUsersSet = new Set<string>();
     parsedTxs.forEach((t) => {
-      if (t.date > period7D.getTime() && t.date <= dayEnd.getTime()) activeUsersSet.add(t.user_id);
+      if (t.created_at > period7D.getTime() && t.created_at <= dayEnd.getTime()) activeUsersSet.add(t.user_id);
     });
     const active_users_7d = activeUsersSet.size;
 
@@ -167,7 +170,8 @@ export async function GET(request: Request) {
         total_transactions,
         new_transactions,
         avg_transactions_per_user,
-        avg_transactions_per_active_user
+        avg_transactions_per_active_user,
+        total_integrations
       }
     });
 

@@ -51,7 +51,6 @@ enum result {
   success
 }
 
-
 model contacts {
   id          Int               @id @default(autoincrement())
   user_id     String?
@@ -88,4 +87,5 @@ model metric_daily {
   new_transactions                 Int?
   avg_transactions_per_user        Float?
   avg_transactions_per_active_user Float?
+  total_integrations               Int?
 }
