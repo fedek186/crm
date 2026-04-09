@@ -1,16 +1,17 @@
 /*
 Este archivo provee los servicios encargados de la interacción con la base de datos para la entidad de usuarios.
 Se encarga de recuperar los listados (ya sea desde Neon DB mediante Prisma o con fallback a Supabase),
-manejar la lógica de paginación y filtrar la data en JavaScript (cuando hay parámetros de la interfaz). 
-También obtiene los perfiles individuales de forma detallada.
+manejar la lógica de paginación y filtrar la analítica en JavaScript (cuando hay parámetros de la interfaz). 
+También obtiene los perfiles unificados detallados y el sumario temporal de transacciones.
 
 Elementos externos:
-- assertAuthenticatedAdmin, createAuthenticatedSupabaseClient: módulos de validación y acceso seguro al backend.
-- prisma: ORM para la conexión local y ejecución a la base de datos principal PostgreSQL.
+- assertAuthenticatedAdmin, createAuthenticatedSupabaseClient: módulos de validación y acceso seguro a capas protegidas del backend.
+- prisma: ORM para la conexión local y ejecución unificada en la base de datos principal PostgreSQL.
 
 Funciones exportadas:
 - getUsersFromNeon: obtiene la lista paginada y filtrada (vía código o búsqueda SQL) de los clientes/usuarios usando Prisma.
-- getUserProfile: recupera la ficha detallada (con interacciones comerciales previas) del perfil personal de un usuario.
+- getUserProfile: recupera la ficha detallada (incluyendo interacciones comerciales registradas) del perfil analítico del usuario.
+- getUserTransactionHistory: recupera y agrupa los logs nativos de transacciones por fecha directamente consumiendo a Supabase, sirviendo matrices para interfaces analíticas.
 */
 import { assertAuthenticatedAdmin, createAuthenticatedSupabaseClient } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
@@ -413,4 +414,60 @@ export async function getUserProfile(userId: string) {
     console.error("Error al obtener perfil del usuario:", error);
     return null;
   }
+}
+
+export async function getUserTransactionHistory(userId: string) {
+  await assertAuthenticatedAdmin();
+  const supabase = await createAuthenticatedSupabaseClient();
+  
+  const { data, error } = await supabase
+    .from("users")
+    .select('transactions(created_at)')
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error || !data || !data.transactions) {
+    return [];
+  }
+
+  // Utilizar UTC para consistencia
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const startOfToday = today.getTime();
+
+  const dailyCounts: Record<string, number> = {};
+
+  for (const tx of data.transactions as Array<{ created_at: string | null }>) {
+    if (!tx.created_at) continue;
+    const txDate = new Date(tx.created_at);
+    
+    // Ignorar transacciones de hoy o fechas futuras
+    if (txDate.getTime() >= startOfToday) {
+      continue; 
+    }
+
+    const txDay = new Date(Date.UTC(txDate.getUTCFullYear(), txDate.getUTCMonth(), txDate.getUTCDate()));
+    const dateStr = txDay.toISOString().split("T")[0];
+    dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
+  }
+
+  const timestamps = Object.keys(dailyCounts).map(d => new Date(d).getTime());
+  const series = [];
+  
+  if (timestamps.length > 0) {
+    const minTimestamp = Math.min(...timestamps);
+    const startDay = new Date(minTimestamp);
+    const endIter = new Date(today);
+    endIter.setUTCDate(today.getUTCDate() - 1);
+
+    for (let d = startDay; d.getTime() <= endIter.getTime(); d.setUTCDate(d.getUTCDate() + 1)) {
+      const dateStr = d.toISOString().split("T")[0];
+      series.push({
+        date: dateStr,
+        count: dailyCounts[dateStr] || 0,
+      });
+    }
+  }
+
+  return series;
 }
