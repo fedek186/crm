@@ -309,7 +309,7 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
               {metric3 === "global" ? (
                 <Line type="monotone" dataKey="avg_transactions_per_user" name="Tx / Usuario Global" stroke="#64748b" strokeWidth={3} dot={{ r: 4, fill: "#64748b", strokeWidth: 0 }} activeDot={{ r: 7, strokeWidth: 0, fill: "#475569" }} />
               ) : (
-                <Line type="monotone" dataKey="avg_transactions_per_active_user" name="Tx / Usuario Activo" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4, fill: "#14b8a6", strokeWidth: 0 }} activeDot={{ r: 7, strokeWidth: 0, fill: "#0d9488" }} />
+                <Line type="monotone" dataKey="avg_transactions_per_active_user" name="New Tx / Usuario Activo" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4, fill: "#14b8a6", strokeWidth: 0 }} activeDot={{ r: 7, strokeWidth: 0, fill: "#0d9488" }} />
               )}
             </LineChart>
           </ResponsiveContainer>
