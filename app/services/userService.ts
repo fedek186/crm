@@ -420,32 +420,45 @@ export async function getUserTransactionHistory(userId: string) {
   await assertAuthenticatedAdmin();
   const supabase = await createAuthenticatedSupabaseClient();
   
-  const { data, error } = await supabase
-    .from("users")
-    .select('transactions(created_at)')
-    .eq("id", userId)
-    .maybeSingle();
+  // Extraemos las transacciones directamente desde la tabla apuntada para asegurar que no nos afecten
+  // los limites de registros de Supabase en sub-consultas (embebed data limit).
+  let userTransactions: any[] = [];
+  let from = 0;
+  const limit = 1000;
+  let keepFetching = true;
 
-  if (error || !data || !data.transactions) {
+  while (keepFetching) {
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("created_at")
+      .eq("user_id", userId)
+      .range(from, from + limit - 1);
+
+    if (error || !data) {
+      break;
+    }
+
+    if (data.length > 0) {
+      userTransactions = userTransactions.concat(data);
+      from += limit;
+    } else {
+      keepFetching = false;
+    }
+  }
+
+  if (userTransactions.length === 0) {
     return [];
   }
 
-  // Utilizar UTC para consistencia
-  const now = new Date();
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const startOfToday = today.getTime();
-
   const dailyCounts: Record<string, number> = {};
 
-  for (const tx of data.transactions as Array<{ created_at: string | null }>) {
+  for (const tx of userTransactions) {
     if (!tx.created_at) continue;
     const txDate = new Date(tx.created_at);
     
-    // Ignorar transacciones de hoy o fechas futuras
-    if (txDate.getTime() >= startOfToday) {
-      continue; 
-    }
-
+    // NO ignoramos las transacciones de "hoy", ya que el panel global (cron/sync) 
+    // las incluye en el contador semanal y mensual de forma integral.
+    // Agrupamos bajo el día estricto UTC para consistencia:
     const txDay = new Date(Date.UTC(txDate.getUTCFullYear(), txDate.getUTCMonth(), txDate.getUTCDate()));
     const dateStr = txDay.toISOString().split("T")[0];
     dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
@@ -457,8 +470,15 @@ export async function getUserTransactionHistory(userId: string) {
   if (timestamps.length > 0) {
     const minTimestamp = Math.min(...timestamps);
     const startDay = new Date(minTimestamp);
-    const endIter = new Date(today);
-    endIter.setUTCDate(today.getUTCDate() - 1);
+    
+    // Iteramos hasta "hoy" (UTC), para evitar que falten jornadas 
+    // vacías en el final del gráfico.
+    const now = new Date();
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    
+    // O si hubo transacciones futuras accidentalmente grabadas, el máximo entre las registradas y hoy
+    const maxTimestamp = Math.max(...timestamps, todayUTC.getTime());
+    const endIter = new Date(maxTimestamp);
 
     for (let d = startDay; d.getTime() <= endIter.getTime(); d.setUTCDate(d.getUTCDate() + 1)) {
       const dateStr = d.toISOString().split("T")[0];
