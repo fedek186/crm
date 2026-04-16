@@ -167,10 +167,10 @@ async function getUsersFromSupabase(options: GetUsersOptions = {}) {
   const loweredSearch = search.trim().toLowerCase();
   const filteredUsers = loweredSearch
     ? normalizedUsers.filter((user) =>
-        [user.name, user.surname, user.email].some((value) =>
-          String(value ?? "").toLowerCase().includes(loweredSearch)
-        )
+      [user.name, user.surname, user.email].some((value) =>
+        String(value ?? "").toLowerCase().includes(loweredSearch)
       )
+    )
     : normalizedUsers;
 
   const sortedUsers = [...filteredUsers].sort((left, right) => {
@@ -263,12 +263,12 @@ export async function getUsersFromNeon(options: GetUsersOptions = {}) {
   const skip = (page - 1) * limit;
   const where = search
     ? {
-        OR: [
-          { name: { contains: search, mode: "insensitive" as const } },
-          { surname: { contains: search, mode: "insensitive" as const } },
-          { email: { contains: search, mode: "insensitive" as const } },
-        ],
-      }
+      OR: [
+        { name: { contains: search, mode: "insensitive" as const } },
+        { surname: { contains: search, mode: "insensitive" as const } },
+        { email: { contains: search, mode: "insensitive" as const } },
+      ],
+    }
     : {};
 
   let orderBy: Prisma.userSummaryOrderByWithRelationInput;
@@ -332,7 +332,7 @@ export async function getUsersFromNeon(options: GetUsersOptions = {}) {
           const boolVal = filterVal === "true";
           return filterOp === "eq" ? cellValue === boolVal : true;
         }
-        
+
         const stringColumns = ["name", "surname", "email", "country", "phone", "state"];
         if (stringColumns.includes(filterCol)) {
           const strCell = String(cellValue || "").toLowerCase();
@@ -344,16 +344,16 @@ export async function getUsersFromNeon(options: GetUsersOptions = {}) {
 
         if (filterCol === "last_contact" || filterCol === "created_at") {
           if (!filterVal || cellValue === null) return false;
-          
+
           let actualTime = cellValue;
           if (filterCol === "created_at") {
-             actualTime = new Date(cellValue).getTime();
+            actualTime = new Date(cellValue).getTime();
           }
 
           const dateObjStart = new Date(filterVal + "T00:00:00");
           const dateValStart = dateObjStart.getTime();
           const dateValEnd = dateValStart + 86400000;
-          
+
           switch (filterOp) {
             case "eq": return actualTime >= dateValStart && actualTime < dateValEnd;
             case "gt": return actualTime >= dateValEnd;
@@ -366,7 +366,7 @@ export async function getUsersFromNeon(options: GetUsersOptions = {}) {
 
         const numCell = Number(cellValue);
         const numVal = Number(filterVal);
-        
+
         if (isNaN(numCell) || isNaN(numVal)) return true;
 
         switch (filterOp) {
@@ -422,7 +422,7 @@ export async function getUserProfile(userId: string) {
 export async function getUserTransactionHistory(userId: string) {
   await assertAuthenticatedAdmin();
   const supabase = await createAuthenticatedSupabaseClient();
-  
+
   // Extraemos las transacciones directamente desde la tabla apuntada para asegurar que no nos afecten
   // los limites de registros de Supabase en sub-consultas (embebed data limit).
   let userTransactions: any[] = [];
@@ -458,7 +458,7 @@ export async function getUserTransactionHistory(userId: string) {
   for (const tx of userTransactions) {
     if (!tx.created_at) continue;
     const txDate = new Date(tx.created_at);
-    
+
     // NO ignoramos las transacciones de "hoy", ya que el panel global (cron/sync) 
     // las incluye en el contador semanal y mensual de forma integral.
     // Agrupamos bajo el día estricto UTC para consistencia:
@@ -469,16 +469,16 @@ export async function getUserTransactionHistory(userId: string) {
 
   const timestamps = Object.keys(dailyCounts).map(d => new Date(d).getTime());
   const series = [];
-  
+
   if (timestamps.length > 0) {
     const minTimestamp = Math.min(...timestamps);
     const startDay = new Date(minTimestamp);
-    
+
     // Iteramos hasta "hoy" (UTC), para evitar que falten jornadas 
     // vacías en el final del gráfico.
     const now = new Date();
     const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    
+
     // O si hubo transacciones futuras accidentalmente grabadas, el máximo entre las registradas y hoy
     const maxTimestamp = Math.max(...timestamps, todayUTC.getTime());
     const endIter = new Date(maxTimestamp);

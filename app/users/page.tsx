@@ -117,13 +117,13 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
                     <td className="px-6 py-4">
                       {user.mp ? <span className="px-2 py-0.5 rounded-full border border-lux-gold/40 text-lux-gold text-[10px] uppercase tracking-wider">Sí</span> : <span className="text-lux-muted text-[10px] uppercase tracking-wider">No</span>}
                     </td>
-                    <td className="px-6 py-4 text-lux-sec text-xs">{user.created_at ? user.created_at.toLocaleDateString() : "-"}</td>
+                    <td className="px-6 py-4 text-lux-sec text-xs">{user.created_at ? user.created_at.toLocaleDateString('es-AR') : "-"}</td>
                     <td className="px-6 py-4 text-white text-center font-bold">
                       {user._count?.contacts || 0}
                     </td>
                     <td className="px-6 py-4 text-lux-sec text-xs font-medium">
                       {user.contacts && user.contacts.length > 0 && user.contacts[0].start_date
-                        ? user.contacts[0].start_date.toLocaleDateString()
+                        ? user.contacts[0].start_date.toLocaleDateString('es-AR')
                         : "null"}
                     </td>
                     <td className="px-6 py-4 text-right">

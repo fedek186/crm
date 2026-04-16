@@ -88,7 +88,7 @@ export async function GET(request: Request) {
 
       // Contar sus transacciones filtrando del pool gigante por userId
       const userTx = allTransactions.filter((tx) => tx.user_id === u.id);
-      
+
       let state = 'NeverUsed' as import('@prisma/client').UserState;
       if (userTx.length > 0) {
         const startTxDate = Math.min(...userTx.map((t: any) => new Date(t.created_at).getTime()));

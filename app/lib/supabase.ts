@@ -74,7 +74,7 @@ export function createSupabaseServerClient(accessToken?: string): SupabaseClient
     },
     global: authorizationHeaders
       ? {
-          headers: authorizationHeaders,
+      headers: authorizationHeaders,
         }
       : undefined,
   });
