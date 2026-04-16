@@ -16,7 +16,7 @@ import { useTransition, useState, useEffect } from "react";
 
 export type FilterColumn = 
   | "name" | "surname" | "email" | "country" | "phone" | "created_at"
-  | "daily_trans" | "week_trans" | "monthly_trans" | "mp" | "contacts" | "last_contact";
+  | "daily_trans" | "week_trans" | "monthly_trans" | "mp" | "contacts" | "last_contact" | "state";
 export type FilterOperator = "eq" | "gt" | "lt" | "gte" | "lte" | "contains";
 
 const COLUMNS: Record<FilterColumn, { label: string; type: "number" | "boolean" | "date" | "string" }> = {
@@ -32,6 +32,7 @@ const COLUMNS: Record<FilterColumn, { label: string; type: "number" | "boolean" 
   created_at: { label: "Fecha Ingreso", type: "date" },
   contacts: { label: "Cant. Contactos", type: "number" },
   last_contact: { label: "Último Contacto", type: "date" },
+  state: { label: "Estado", type: "string" },
 };
 
 const OPERATORS_FOR_TYPE = {

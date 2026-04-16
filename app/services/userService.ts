@@ -51,6 +51,7 @@ type FallbackUser = {
   surname: string | null;
   user_id: string;
   week_trans: number;
+  state?: string | null;
 };
 
 function buildUserMetrics(user: SupabaseUserRow) {
@@ -159,6 +160,7 @@ async function getUsersFromSupabase(options: GetUsersOptions = {}) {
       surname: user.surname,
       user_id: String(user.id),
       week_trans: metrics.week_trans,
+      state: null,
     };
   });
 
@@ -234,6 +236,7 @@ async function getUserProfileFromSupabase(userId: string) {
     surname: data.surname,
     user_id: String(data.id),
     week_trans: metrics.week_trans,
+    state: null,
   };
 }
 
@@ -330,7 +333,7 @@ export async function getUsersFromNeon(options: GetUsersOptions = {}) {
           return filterOp === "eq" ? cellValue === boolVal : true;
         }
         
-        const stringColumns = ["name", "surname", "email", "country", "phone"];
+        const stringColumns = ["name", "surname", "email", "country", "phone", "state"];
         if (stringColumns.includes(filterCol)) {
           const strCell = String(cellValue || "").toLowerCase();
           const strVal = String(filterVal).toLowerCase();

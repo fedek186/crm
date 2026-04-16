@@ -25,30 +25,21 @@ model userSummary {
   phone         String?
   created_at    DateTime?
   last_update   DateTime?  @db.Timestamp(6)
+  state         UserState? @default(NeverUsed)
   contacts      contacts[]
 }
 
-enum ContactState {
-  contacted
-  talking
-  finalizado
-  no_response
-}
-
-enum ContactObjective {
-  activation
-  increase_trans
-  MP
-}
-
-enum media {
-  number
-  email
-}
-
-enum result {
-  fail
-  success
+enum UserState {
+  /// user has never made a transaction
+  NeverUsed
+  /// user made their first transaction within the last 7 days
+  New
+  /// user has made at least one transaction in the last 7 days
+  Active
+  /// user made transactions before but none in the last 7–30 days
+  AtRisk
+  /// user has not made any transactions in over 30 days
+  Churned
 }
 
 model contacts {
@@ -83,9 +74,32 @@ model metric_daily {
   total_users                      Int?
   new_users                        Int?
   active_users_7d                  Int?
-  total_transactions               Int?
-  new_transactions                 Int?
-  avg_transactions_per_user        Float?
   avg_transactions_per_active_user Float?
+  avg_transactions_per_user        Float?
+  new_transactions                 Int?
+  total_transactions               Int?
   total_integrations               Int?
+}
+
+enum ContactState {
+  contacted
+  talking
+  finalizado
+  no_response
+}
+
+enum media {
+  number
+  email
+}
+
+enum ContactObjective {
+  activation
+  increase_trans
+  MP
+}
+
+enum result {
+  fail
+  success
 }

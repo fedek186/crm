@@ -88,6 +88,23 @@ export async function GET(request: Request) {
 
       // Contar sus transacciones filtrando del pool gigante por userId
       const userTx = allTransactions.filter((tx) => tx.user_id === u.id);
+      
+      let state = 'NeverUsed' as import('@prisma/client').UserState;
+      if (userTx.length > 0) {
+        const startTxDate = Math.min(...userTx.map((t: any) => new Date(t.created_at).getTime()));
+        const lastTxDate = Math.max(...userTx.map((t: any) => new Date(t.created_at).getTime()));
+
+        if (startTxDate >= sevenDaysAgoWindow) {
+          state = 'New';
+        } else if (lastTxDate >= sevenDaysAgoWindow) {
+          state = 'Active';
+        } else if (lastTxDate >= thirtyDaysAgoWindow) {
+          state = 'AtRisk';
+        } else {
+          state = 'Churned';
+        }
+      }
+
       for (const tx of userTx) {
         if (!tx.created_at) continue;
         const txDate = new Date(tx.created_at).getTime();
@@ -108,7 +125,8 @@ export async function GET(request: Request) {
         daily_trans: daily,
         week_trans: week,
         monthly_trans: month,
-        last_update: new Date()
+        last_update: new Date(),
+        state: state
       };
     });
 

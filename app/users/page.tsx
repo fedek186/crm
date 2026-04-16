@@ -21,6 +21,23 @@ import Pagination from "../components/Pagination";
 import UserFilters from "../components/UserFilters";
 import { prisma } from "../lib/prisma";
 
+const getStateBadge = (state: string | null | undefined) => {
+  switch (state) {
+    case 'NeverUsed':
+      return <span className="px-2 py-0.5 rounded-full border border-gray-500/40 text-gray-400 text-[10px] uppercase tracking-wider">Never Used</span>;
+    case 'New':
+      return <span className="px-2 py-0.5 rounded-full border border-purple-500/40 text-purple-400 text-[10px] uppercase tracking-wider">New</span>;
+    case 'Active':
+      return <span className="px-2 py-0.5 rounded-full border border-green-500/40 text-green-400 text-[10px] uppercase tracking-wider">Active</span>;
+    case 'AtRisk':
+      return <span className="px-2 py-0.5 rounded-full border border-orange-500/40 text-orange-400 text-[10px] uppercase tracking-wider">At Risk</span>;
+    case 'Churned':
+      return <span className="px-2 py-0.5 rounded-full border border-red-500/40 text-red-500 text-[10px] uppercase tracking-wider">Churned</span>;
+    default:
+      return <span className="px-2 py-0.5 rounded-full border border-gray-500/40 text-gray-500 text-[10px] uppercase tracking-wider">{state || 'Unknown'}</span>;
+  }
+};
+
 export default async function Home(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
   await requireAuthenticatedAdminPage();
   const searchParams = (await props.searchParams) || {};
@@ -70,6 +87,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
               <thead>
                 <tr className="border-b border-lux-hover/60 text-[11px] font-semibold uppercase tracking-widest text-lux-sec bg-lux-surface">
                   <SortableHeader title="ID" column="id" />
+                  <SortableHeader title="Estado" column="state" />
                   <SortableHeader title="Nombre" column="name" />
                   <SortableHeader title="Apellido" column="surname" />
                   <SortableHeader title="Email" column="email" />
@@ -88,6 +106,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
                 {users.map((user) => (
                   <tr key={user.id} className="hover:bg-lux-hover/20 transition-colors duration-300">
                     <td className="px-6 py-4 text-lux-muted text-xs">{user.id}</td>
+                    <td className="px-6 py-4">{getStateBadge(user.state)}</td>
                     <td className="px-6 py-4 text-white font-medium">{user.name || "-"}</td>
                     <td className="px-6 py-4 text-white font-medium">{user.surname || "-"}</td>
                     <td className="px-6 py-4 text-lux-sec text-xs">{user.email || "-"}</td>
