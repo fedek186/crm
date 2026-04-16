@@ -16,10 +16,10 @@ import { useTransition, useState, useEffect } from "react";
 
 export type FilterColumn = 
   | "name" | "surname" | "email" | "country" | "phone" | "created_at"
-  | "daily_trans" | "week_trans" | "monthly_trans" | "mp" | "contacts" | "last_contact" | "state";
+  | "daily_trans" | "week_trans" | "monthly_trans" | "mp" | "state" | "categories" | "accounts" | "contacts" | "last_contact";
 export type FilterOperator = "eq" | "gt" | "lt" | "gte" | "lte" | "contains";
 
-const COLUMNS: Record<FilterColumn, { label: string; type: "number" | "boolean" | "date" | "string" }> = {
+const COLUMNS: Record<FilterColumn, { label: string; type: "number" | "boolean" | "date" | "string" | "enum" }> = {
   name: { label: "Nombre", type: "string" },
   surname: { label: "Apellido", type: "string" },
   email: { label: "Email", type: "string" },
@@ -32,7 +32,9 @@ const COLUMNS: Record<FilterColumn, { label: string; type: "number" | "boolean" 
   created_at: { label: "Fecha Ingreso", type: "date" },
   contacts: { label: "Cant. Contactos", type: "number" },
   last_contact: { label: "Último Contacto", type: "date" },
-  state: { label: "Estado", type: "string" },
+  state: { label: "Estado", type: "enum" },
+  categories: { label: "Categorías", type: "number" },
+  accounts: { label: "Cuentas", type: "number" },
 };
 
 const OPERATORS_FOR_TYPE = {
@@ -56,6 +58,9 @@ const OPERATORS_FOR_TYPE = {
   string: [
     { value: "contains", label: "Contiene" },
     { value: "eq", label: "Estrictamente igual a" },
+  ],
+  enum: [
+    { value: "eq", label: "Es exactamente" },
   ],
 };
 
@@ -171,6 +176,21 @@ export default function UserFilters() {
               <option value="" disabled>Seleccionar...</option>
               <option value="true">Sí (Tiene MP)</option>
               <option value="false">No (No tiene MP)</option>
+            </select>
+          ) : columnDef.type === "enum" ? (
+            <select
+              className="select select-bordered w-full border-lux-hover bg-lux-bg text-white"
+              disabled={isPending}
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+            >
+              <option value="" disabled>Seleccionar estado...</option>
+              <option value="NeverUsed">Never Used</option>
+              <option value="New">New</option>
+              <option value="Active">Active</option>
+              <option value="ActivePlus">Active+</option>
+              <option value="AtRisk">At Risk</option>
+              <option value="Churned">Churned</option>
             </select>
           ) : columnDef.type === "date" ? (
             <input

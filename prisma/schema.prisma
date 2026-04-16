@@ -24,6 +24,8 @@ model userSummary {
   country       String?
   phone         String?
   created_at    DateTime?
+  categories    Int?       @default(0)
+  accounts      Int?       @default(0)
   last_update   DateTime?  @db.Timestamp(6)
   state         UserState? @default(NeverUsed)
   contacts      contacts[]
@@ -36,6 +38,8 @@ enum UserState {
   New
   /// user has made at least one transaction in the last 7 days
   Active
+  /// active user for more than 14 days in the app
+  ActivePlus
   /// user made transactions before but none in the last 7–30 days
   AtRisk
   /// user has not made any transactions in over 30 days

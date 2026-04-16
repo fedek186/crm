@@ -52,6 +52,8 @@ type FallbackUser = {
   user_id: string;
   week_trans: number;
   state?: string | null;
+  categories: number;
+  accounts: number;
 };
 
 function buildUserMetrics(user: SupabaseUserRow) {
@@ -161,6 +163,8 @@ async function getUsersFromSupabase(options: GetUsersOptions = {}) {
       user_id: String(user.id),
       week_trans: metrics.week_trans,
       state: null,
+      categories: 0,
+      accounts: 0,
     };
   });
 
@@ -237,6 +241,8 @@ async function getUserProfileFromSupabase(userId: string) {
     user_id: String(data.id),
     week_trans: metrics.week_trans,
     state: null,
+    categories: 0,
+    accounts: 0,
   };
 }
 

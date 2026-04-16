@@ -29,6 +29,8 @@ const getStateBadge = (state: string | null | undefined) => {
       return <span className="px-2 py-0.5 rounded-full border border-purple-500/40 text-purple-400 text-[10px] uppercase tracking-wider">New</span>;
     case 'Active':
       return <span className="px-2 py-0.5 rounded-full border border-green-500/40 text-green-400 text-[10px] uppercase tracking-wider">Active</span>;
+    case 'ActivePlus':
+      return <span className="px-2 py-0.5 rounded-full border border-teal-500/40 text-teal-400 text-[10px] uppercase tracking-wider font-bold">Active +</span>;
     case 'AtRisk':
       return <span className="px-2 py-0.5 rounded-full border border-orange-500/40 text-orange-400 text-[10px] uppercase tracking-wider">At Risk</span>;
     case 'Churned':
@@ -96,6 +98,8 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
                   <SortableHeader title="Semanal" column="week_trans" />
                   <SortableHeader title="Mes" column="monthly_trans" />
                   <SortableHeader title="MP" column="mp" />
+                  <SortableHeader title="Categorías" column="categories" />
+                  <SortableHeader title="Cuentas" column="accounts" />
                   <SortableHeader title="Ingreso" column="created_at" />
                   <SortableHeader title="Contactos" column="contacts" />
                   <th className="px-6 py-4 font-medium">Último</th>
@@ -117,6 +121,8 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
                     <td className="px-6 py-4">
                       {user.mp ? <span className="px-2 py-0.5 rounded-full border border-lux-gold/40 text-lux-gold text-[10px] uppercase tracking-wider">Sí</span> : <span className="text-lux-muted text-[10px] uppercase tracking-wider">No</span>}
                     </td>
+                    <td className="px-6 py-4 text-white font-medium text-center">{user.categories || 0}</td>
+                    <td className="px-6 py-4 text-white font-medium text-center">{user.accounts || 0}</td>
                     <td className="px-6 py-4 text-lux-sec text-xs">{user.created_at ? user.created_at.toLocaleDateString('es-AR') : "-"}</td>
                     <td className="px-6 py-4 text-white text-center font-bold">
                       {user._count?.contacts || 0}

@@ -67,6 +67,23 @@ export async function GET(request: Request) {
       }
     }
 
+    let allCategories: any[] = [];
+    let allWallets: any[] = [];
+
+    from = 0; keepFetching = true;
+    while (keepFetching) {
+      const { data, error } = await supabase.from("categories").select("user_id").is("deleted_at", null).range(from, from + limit - 1);
+      if (error) throw new Error(error.message);
+      if (data && data.length > 0) { allCategories = allCategories.concat(data); from += limit; } else keepFetching = false;
+    }
+
+    from = 0; keepFetching = true;
+    while (keepFetching) {
+      const { data, error } = await supabase.from("wallets").select("user_id").is("deleted_at", null).range(from, from + limit - 1);
+      if (error) throw new Error(error.message);
+      if (data && data.length > 0) { allWallets = allWallets.concat(data); from += limit; } else keepFetching = false;
+    }
+
     // B) Traer lista final de usuarios y sus integraciones (MP)
     // Para simplificar User Summary, usamos el modelo relacional estándar
     const { data: usersData, error: usrErr } = await supabase.from("users").select(`
@@ -80,6 +97,7 @@ export async function GET(request: Request) {
     // Horarios para los cálculos transaccionales por usuario:
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
     const sevenDaysAgoWindow = now.getTime() - 7 * 24 * 60 * 60 * 1000;
+    const fourteenDaysAgoWindow = now.getTime() - 14 * 24 * 60 * 60 * 1000;
     const thirtyDaysAgoWindow = now.getTime() - 30 * 24 * 60 * 60 * 1000;
 
     const formattedPrismaSummary = (usersData || []).map((u: any) => {
@@ -97,7 +115,12 @@ export async function GET(request: Request) {
         if (startTxDate >= sevenDaysAgoWindow) {
           state = 'New';
         } else if (lastTxDate >= sevenDaysAgoWindow) {
-          state = 'Active';
+          const userEntryTime = u.created_at ? new Date(u.created_at).getTime() : startTxDate;
+          if (userEntryTime <= fourteenDaysAgoWindow) {
+            state = 'ActivePlus';
+          } else {
+            state = 'Active';
+          }
         } else if (lastTxDate >= thirtyDaysAgoWindow) {
           state = 'AtRisk';
         } else {
@@ -113,6 +136,9 @@ export async function GET(request: Request) {
         if (txDate >= thirtyDaysAgoWindow) month += 1;
       }
 
+      const userCategoriesCount = allCategories.filter((c) => c.user_id === u.id).length;
+      const userWalletsCount = allWallets.filter((w) => w.user_id === u.id).length;
+
       return {
         user_id: String(u.id),
         email: u.email,
@@ -122,6 +148,8 @@ export async function GET(request: Request) {
         country: u.country,
         created_at: u.created_at ? new Date(u.created_at) : null,
         mp: hasMP,
+        categories: userCategoriesCount,
+        accounts: userWalletsCount,
         daily_trans: daily,
         week_trans: week,
         monthly_trans: month,
