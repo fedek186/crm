@@ -17,7 +17,7 @@ export async function getDashboardMetrics(days = 30) {
       date: 'desc',
     },
   };
-  
+
   if (days > 0) {
     query.take = days;
   }

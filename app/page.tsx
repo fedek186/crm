@@ -21,8 +21,8 @@ const DashboardCharts = dynamic(() => import("./components/DashboardCharts"), {
   loading: () => (
     <div className="w-full h-[350px] flex items-center justify-center bg-lux-surface rounded-xl border border-lux-hover/30 p-8 shadow-2xl">
       <div className="flex flex-col items-center gap-4">
-         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-lux-gold"></div>
-         <p className="text-lux-sec text-sm">Cargando métricas...</p>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-lux-gold"></div>
+        <p className="text-lux-sec text-sm">Cargando métricas...</p>
       </div>
     </div>
   ),
@@ -40,7 +40,7 @@ export default async function Page() {
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white drop-shadow-sm flex items-center gap-3">Dashboard</h1>
           {latestMetric?.date && (
             <p className="text-lux-sec text-sm pb-1 font-medium bg-lux-surface/50 border border-lux-hover/30 px-3 py-1.5 rounded-lg inline-flex items-center">
-              Datos al {new Date(latestMetric.date).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC'})}
+              Datos al {new Date(latestMetric.date).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}
             </p>
           )}
         </div>
@@ -74,7 +74,7 @@ export default async function Page() {
             <h4 className="text-xs text-lux-muted font-bold uppercase tracking-widest mb-3">Nuevos Usuarios</h4>
             <div className="flex items-center">
               <span className="text-3xl lg:text-4xl font-bold text-white leading-none">
-                 {latestMetric?.new_users?.toLocaleString() || "0"}
+                {latestMetric?.new_users?.toLocaleString() || "0"}
               </span>
             </div>
             <p className="text-xs text-lux-sec mt-3 border-t border-lux-hover/30 pt-3">Recien registrados</p>
@@ -94,12 +94,12 @@ export default async function Page() {
 
         {/* Gráficos en Client Component cargados asíncronamente */}
         {chartData.length > 0 ? (
-           <DashboardCharts data={chartData} />
+          <DashboardCharts data={chartData} />
         ) : (
           <div className="w-full py-16 flex flex-col items-center justify-center bg-lux-surface rounded-xl shadow-2xl border border-lux-hover/30 text-lux-sec">
-             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="opacity-40 mb-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-             <p className="text-lg font-medium text-white mb-1">Sin datos estadísticos</p>
-             <p className="text-sm">No exiten registros en la tabla metric_daily suficientes.</p>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="opacity-40 mb-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+            <p className="text-lg font-medium text-white mb-1">Sin datos estadísticos</p>
+            <p className="text-sm">No exiten registros en la tabla metric_daily suficientes.</p>
           </div>
         )}
 
