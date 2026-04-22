@@ -114,7 +114,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
                     <td className="px-6 py-4 text-white font-medium">{user.name || "-"}</td>
                     <td className="px-6 py-4 text-white font-medium">{user.surname || "-"}</td>
                     <td className="px-6 py-4 text-lux-sec text-xs">{user.email || "-"}</td>
-                    <td className="px-6 py-4 text-lux-sec text-xs">{user.phone || "-"}</td>
+                    <td className="px-6 py-4 text-lux-sec text-xs"><a href={`https://wa.me/${user.phone}`} target="_blank" rel="noopener noreferrer" className="text-lux-sec">{user.phone || "-"}</a></td>
                     <td className="px-6 py-4">{user.daily_trans || 0}</td>
                     <td className="px-6 py-4">{user.week_trans || 0}</td>
                     <td className="px-6 py-4 text-lux-gold font-medium">{user.monthly_trans || 0}</td>
