@@ -461,6 +461,7 @@ export async function getUserTransactionHistory(userId: string) {
 
   const dailyCounts: Record<string, number> = {};
 
+
   for (const tx of userTransactions) {
     if (!tx.created_at) continue;
     const txDate = new Date(tx.created_at);

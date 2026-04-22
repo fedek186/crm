@@ -98,10 +98,21 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
     setHiddenSeries(prev => ({ ...prev, [dataKey]: !prev[dataKey] }));
   };
 
-  const chartData1 = range1 === 0 ? baseChartData : baseChartData.slice(-range1);
+  const chartData1Base = range1 === 0 ? baseChartData : baseChartData.slice(-range1);
+  const avgNewUsers = chartData1Base.length > 0 ? chartData1Base.reduce((sum, d) => sum + d.new_users, 0) / chartData1Base.length : 0;
+  const chartData1 = chartData1Base.map(d => ({ ...d, avg_new_users: Math.round(avgNewUsers * 10) / 10 }));
+
   const chartData2 = range2 === 0 ? baseChartData : baseChartData.slice(-range2);
-  const chartData3 = range3 === 0 ? baseChartData : baseChartData.slice(-range3);
-  const chartData4 = range4 === 0 ? baseChartData : baseChartData.slice(-range4);
+
+  const chartData3Base = range3 === 0 ? baseChartData : baseChartData.slice(-range3);
+  const avgTxPerUser = chartData3Base.length > 0 
+    ? chartData3Base.reduce((sum, d) => sum + (metric3 === "global" ? d.avg_transactions_per_user : d.avg_transactions_per_active_user), 0) / chartData3Base.length 
+    : 0;
+  const chartData3 = chartData3Base.map(d => ({ ...d, current_avg_tx: Math.round(avgTxPerUser * 10) / 10 }));
+
+  const chartData4Base = range4 === 0 ? baseChartData : baseChartData.slice(-range4);
+  const avgNewTx = chartData4Base.length > 0 ? chartData4Base.reduce((sum, d) => sum + d.new_transactions, 0) / chartData4Base.length : 0;
+  const chartData4 = chartData4Base.map(d => ({ ...d, avg_new_transactions: Math.round(avgNewTx * 10) / 10 }));
 
   const calcDomain = (val: number, isMax: boolean) => {
     if (val === 0 || !val) return 0;
@@ -209,14 +220,15 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
         </div>
         <div className="h-[280px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData1} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+            <ComposedChart data={chartData1} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="#ffffff08" vertical={false} />
               <XAxis dataKey="formattedDate" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} />
               <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} domain={[(dataMin: number) => calcDomain(dataMin, false), (dataMax: number) => calcDomain(dataMax, true)]} />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05' }} />
               <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '20px' }} />
               <Bar dataKey="new_users" name="Nuevos Usuarios" fill="#818cf8" radius={[4, 4, 0, 0]} maxBarSize={30} />
-            </BarChart>
+              <Line type="monotone" dataKey="avg_new_users" name="Promedio" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={false} />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -311,6 +323,7 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
               ) : (
                 <Line type="monotone" dataKey="avg_transactions_per_active_user" name="New Tx / Usuario Activo" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4, fill: "#14b8a6", strokeWidth: 0 }} activeDot={{ r: 7, strokeWidth: 0, fill: "#0d9488" }} />
               )}
+              <Line type="monotone" dataKey="current_avg_tx" name="Promedio" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -331,14 +344,15 @@ export default function DashboardCharts({ data }: DashboardChartsProps) {
         </div>
         <div className="h-[280px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData4} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+            <ComposedChart data={chartData4} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 4" stroke="#ffffff08" vertical={false} />
               <XAxis dataKey="formattedDate" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} />
               <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickMargin={14} domain={[(dataMin: number) => calcDomain(dataMin, false), (dataMax: number) => calcDomain(dataMax, true)]} />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05' }} />
               <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '20px' }} />
               <Bar dataKey="new_transactions" name="Nuevas Transacciones" fill="#818cf8" radius={[4, 4, 0, 0]} maxBarSize={30} />
-            </BarChart>
+              <Line type="monotone" dataKey="avg_new_transactions" name="Promedio" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={false} />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       </div>
