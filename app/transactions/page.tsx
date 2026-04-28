@@ -1,6 +1,9 @@
 import Pagination from "@/app/components/Pagination";
 import TransactionFilters from "@/app/components/transactions/TransactionFilters";
 import TransactionTable from "@/app/components/transactions/TransactionTable";
+import PageShell from "@/app/components/ui/PageShell";
+import PageHeader from "@/app/components/ui/PageHeader";
+import PageError from "@/app/components/ui/PageError";
 import { requireAuthenticatedAdminPage } from "@/app/lib/auth";
 import type {
   TransactionFilterOption,
@@ -77,32 +80,20 @@ export default async function TransactionsPage(props: TransactionsPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-lux-bg px-6 py-8 text-lux-text md:px-12">
-      <div className="mx-auto max-w-[1600px] space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight text-white md:text-5xl">
-            Transacciones
-          </h1>
-          <p className="max-w-2xl text-sm text-lux-sec md:text-base">
-            Explorá movimientos, detectá transferencias y asigná merchants sin salir del CRM.
-          </p>
+    <PageShell>
+      <PageHeader
+        title="Transacciones"
+        subtitle="Explorá movimientos, detectá transferencias y asigná merchants sin salir del CRM."
+      />
+      {loadError ? (
+        <PageError title="No se pudo cargar el módulo de transacciones" message={loadError} />
+      ) : (
+        <div className="space-y-6">
+          <TransactionFilters />
+          <TransactionTable transactions={items} />
+          <Pagination totalPages={totalPages} />
         </div>
-
-        {loadError ? (
-          <div className="alert border border-red-500/20 bg-red-500/10 text-red-100 shadow-xl">
-            <div className="space-y-2">
-              <h2 className="text-base font-semibold">No se pudo cargar el módulo de transacciones</h2>
-              <p className="text-sm">{loadError}</p>
-            </div>
-          </div>
-        ) : (
-          <>
-            <TransactionFilters />
-            <TransactionTable transactions={items} />
-            <Pagination totalPages={totalPages} />
-          </>
-        )}
-      </div>
-    </div>
+      )}
+    </PageShell>
   );
 }

@@ -1,5 +1,23 @@
+/*
+Este archivo renderiza la página principal del catálogo de merchants del CRM.
+Protege el acceso para administradores, obtiene el listado paginado y lo inyecta en el componente de lista.
+
+Elementos externos:
+- requireAuthenticatedAdminPage: valida que la página solo pueda ser vista por un administrador autenticado.
+- getMerchants: obtiene la lista paginada de merchants desde Supabase.
+- MerchantList: componente cliente que renderiza la grilla de merchants con acciones CRUD.
+- PageShell: wrapper base con fondo y layout estándar del CRM.
+- PageHeader: encabezado estándar con título y slot derecho para acciones.
+- PageError: bloque de error estándar para fallo en la carga del módulo.
+*/
+
 import Pagination from "@/app/components/Pagination";
 import MerchantList from "@/app/components/merchants/MerchantList";
+import MerchantCreateButton from "@/app/components/merchants/MerchantCreateButton";
+import PageShell from "@/app/components/ui/PageShell";
+import PageHeader from "@/app/components/ui/PageHeader";
+import PageError from "@/app/components/ui/PageError";
+import SearchTableInput from "@/app/components/SearchTableInput";
 import { requireAuthenticatedAdminPage } from "@/app/lib/auth";
 import { getMerchantErrorMessage, getMerchants } from "@/app/services/merchant.service";
 
@@ -21,12 +39,22 @@ export default async function MerchantsPage(props: MerchantsPageProps) {
     });
 
     return (
-      <div className="min-h-screen bg-base-200 px-6 py-10">
-        <div className="mx-auto max-w-7xl space-y-6">
+      <PageShell>
+        <PageHeader
+          title="Merchants"
+          subtitle="Gestioná merchants, dominios y aliases desde un solo lugar."
+          right={
+            <>
+              <SearchTableInput placeholder="Buscar por nombre, URL o tag..." />
+              <MerchantCreateButton />
+            </>
+          }
+        />
+        <div className="space-y-6">
           <MerchantList merchants={merchants} />
           <Pagination totalPages={totalPages} />
         </div>
-      </div>
+      </PageShell>
     );
   } catch (error) {
     const message = getMerchantErrorMessage(
@@ -35,16 +63,9 @@ export default async function MerchantsPage(props: MerchantsPageProps) {
     );
 
     return (
-      <div className="min-h-screen bg-base-200 px-6 py-10">
-        <div className="mx-auto max-w-4xl">
-          <div className="alert alert-error shadow-sm">
-            <div className="space-y-2">
-              <h1 className="text-base font-semibold">No se pudo cargar el modulo de merchants</h1>
-              <p className="text-sm">{message}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PageShell>
+        <PageError title="No se pudo cargar el módulo de merchants" message={message} />
+      </PageShell>
     );
   }
 }

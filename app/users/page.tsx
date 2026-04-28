@@ -6,7 +6,6 @@ Este archivo renderiza la pantalla principal de usuarios del panel de administra
       Elementos externos:
       - requireAuthenticatedAdminPage: valida que la página solo pueda ser vista por un administrador autenticado.
       - getUsersFromNeon: obtiene desde la base analítica los usuarios y la información necesaria para listar la tabla.
-      - getSupabaseData: ejecuta la sincronización de datos cuando el usuario aprieta el botón correspondiente.
       - SearchTableInput: provee el buscador de la tabla.
       - SortableHeader: permite ordenar columnas desde la cabecera.
       - Pagination: muestra la navegación entre páginas del listado.
@@ -19,6 +18,8 @@ import SearchTableInput from "../components/SearchTableInput";
 import SortableHeader from "../components/SortableHeader";
 import Pagination from "../components/Pagination";
 import UserFilters from "../components/UserFilters";
+import PageShell from "../components/ui/PageShell";
+import PageHeader from "../components/ui/PageHeader";
 import { prisma } from "../lib/prisma";
 
 const getStateBadge = (state: string | null | undefined) => {
@@ -67,24 +68,13 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
 
 
   return (
-    <div className="min-h-screen bg-lux-bg text-lux-text p-6 md:p-12 selection:bg-lux-gold selection:text-lux-bg">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight text-white drop-shadow-sm">
-              Usuarios
-            </h1>
-            <p className="text-sm font-medium tracking-wide text-lux-gold">
-              {totalCount} {totalCount === 1 ? 'usuario encontrado' : 'usuarios encontrados'}
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
-            <SearchTableInput />
-          </div>
-        </div>
-
-        <UserFilters />
+    <PageShell>
+      <PageHeader
+        title="Usuarios"
+        subtitle={`${totalCount} ${totalCount === 1 ? 'usuario encontrado' : 'usuarios encontrados'}`}
+        right={<SearchTableInput />}
+      />
+      <UserFilters />
 
         <div className="bg-lux-surface rounded-xl shadow-2xl border border-lux-hover/40 overflow-hidden mb-8">
           <div className="overflow-x-auto">
@@ -148,7 +138,6 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
         </div>
 
         <Pagination totalPages={totalPages} />
-      </div>
-    </div>
+    </PageShell>
   );
 }

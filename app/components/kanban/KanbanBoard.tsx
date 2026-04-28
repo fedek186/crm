@@ -30,10 +30,14 @@ import {
   DragEndEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
-import { ContactState } from "@prisma/client";
+import { type Prisma, ContactState } from "@prisma/client";
 import KanbanColumn from "./KanbanColumn";
 import KanbanCard from "./KanbanCard";
 import { updateContactsKanbanOrder } from "@/app/actions/contactKanbanActions";
+
+type KanbanContact = Prisma.contactsGetPayload<{ include: { user: true } }> & {
+  numero: number;
+};
 
 const COLUMNS = [
   { id: 'contacted', title: 'Contactado' },
@@ -42,9 +46,9 @@ const COLUMNS = [
   { id: 'finalizado', title: 'Finalizado' },
 ];
 
-export default function KanbanBoard({ initialContacts }: { initialContacts: any[] }) {
-  const [contacts, setContacts] = useState(initialContacts);
-  const [activeContact, setActiveContact] = useState<any>(null);
+export default function KanbanBoard({ initialContacts }: { initialContacts: KanbanContact[] }) {
+  const [contacts, setContacts] = useState<KanbanContact[]>(initialContacts);
+  const [activeContact, setActiveContact] = useState<KanbanContact | null>(null);
   const [isPending, startTransition] = useTransition();
   const [mounted, setMounted] = useState(false);
 

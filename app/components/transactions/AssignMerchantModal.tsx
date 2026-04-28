@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { getMerchantOptionsAction, assignMerchantToTransaction } from "@/app/actions/transaction.actions";
-import type { MerchantOption } from "@/app/lib/transaction";
+import { useState, useTransition } from "react";
+import { assignMerchantToTransaction } from "@/app/actions/transaction.actions";
+import { useMerchantSearch } from "@/app/hooks/useMerchantSearch";
 import { useRouter } from "next/navigation";
 
 type AssignMerchantModalProps = {
@@ -12,10 +12,6 @@ type AssignMerchantModalProps = {
   transactionId: string | null;
 };
 
-function normalizeSearch(value: string): string {
-  return value.trim();
-}
-
 export default function AssignMerchantModal({
   isOpen,
   onClose,
@@ -24,36 +20,16 @@ export default function AssignMerchantModal({
 }: AssignMerchantModalProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [merchants, setMerchants] = useState<MerchantOption[]>([]);
   const [search, setSearch] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [isLoadingOptions, setIsLoadingOptions] = useState(false);
+
+  const { merchants, isLoading: isLoadingOptions } = useMerchantSearch(search, { enabled: isOpen });
 
   const handleClose = () => {
     setSearch("");
     setError(null);
-    setMerchants([]);
     onClose();
   };
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handler = setTimeout(() => {
-      setIsLoadingOptions(true);
-      setError(null);
-
-      startTransition(async () => {
-        const merchantOptions = await getMerchantOptionsAction(normalizeSearch(search));
-        setMerchants(merchantOptions);
-        setIsLoadingOptions(false);
-      });
-    }, 250);
-
-    return () => clearTimeout(handler);
-  }, [isOpen, search]);
 
   const handleAssign = (merchantId: string) => {
     if (!transactionId) {

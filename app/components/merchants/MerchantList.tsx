@@ -1,7 +1,19 @@
 "use client";
 
+/*
+Este archivo renderiza el listado de merchants con acciones de edición y archivado.
+Muestra una grilla en mobile y una tabla en desktop. La creación de merchants
+se maneja desde MerchantCreateButton en el header de la página.
+
+Elementos externos:
+- deleteMerchantAction: Server Action para archivar (soft delete) un merchant.
+- MerchantForm: formulario reutilizable para editar un merchant.
+
+Funciones exportadas:
+- MerchantList: componente cliente que renderiza la lista de merchants con edición y archivado.
+*/
+
 import { useMemo, useState, useTransition } from "react";
-import SearchTableInput from "@/app/components/SearchTableInput";
 import type { Merchant } from "@/app/lib/merchant";
 import { deleteMerchantAction } from "@/app/actions/merchant.actions";
 import { useRouter } from "next/navigation";
@@ -22,7 +34,6 @@ export default function MerchantList({ merchants }: MerchantListProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [editingMerchantId, setEditingMerchantId] = useState<Merchant["id"] | null>(null);
-  const [dialogMode, setDialogMode] = useState<"create" | "edit" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const editingMerchant = useMemo(
@@ -30,7 +41,7 @@ export default function MerchantList({ merchants }: MerchantListProps) {
     [editingMerchantId, merchants]
   );
 
-  const isDialogOpen = dialogMode !== null;
+  const isEditOpen = editingMerchantId !== null;
 
   const handleDelete = (merchantId: Merchant["id"]) => {
     const confirmed = window.confirm(
@@ -50,27 +61,18 @@ export default function MerchantList({ merchants }: MerchantListProps) {
 
       if (editingMerchantId === merchantId) {
         setEditingMerchantId(null);
-        setDialogMode(null);
       }
 
       router.refresh();
     });
   };
 
-  const openCreateDialog = () => {
-    setDialogMode("create");
-    setEditingMerchantId(null);
-    setError(null);
-  };
-
   const openEditDialog = (merchantId: Merchant["id"]) => {
-    setDialogMode("edit");
     setEditingMerchantId(merchantId);
     setError(null);
   };
 
-  const closeDialog = () => {
-    setDialogMode(null);
+  const closeEditDialog = () => {
     setEditingMerchantId(null);
   };
 
@@ -79,14 +81,14 @@ export default function MerchantList({ merchants }: MerchantListProps) {
       return (
         <img
           alt={`Logo de ${merchant.name}`}
-          className="h-12 w-12 rounded-xl border border-base-300 object-contain bg-base-200 p-2"
+          className="h-12 w-12 rounded-xl border border-lux-hover/40 object-contain bg-lux-bg p-2"
           src={merchant.logo_url}
         />
       );
     }
 
     return (
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-base-300 bg-base-200 text-sm font-bold uppercase text-base-content/60">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-lux-hover/40 bg-lux-bg text-sm font-bold uppercase text-lux-gold">
         {merchant.name.slice(0, 2)}
       </div>
     );
@@ -97,24 +99,24 @@ export default function MerchantList({ merchants }: MerchantListProps) {
       {merchant.aliases.length > 0 ? (
         merchant.aliases.map((alias, index) => (
           <span
-            className="badge badge-outline"
+            className="px-2 py-0.5 rounded-full border border-lux-hover/40 text-lux-sec text-[10px] uppercase tracking-wider"
             key={`${merchant.id}-${alias}-${index}`}
           >
             {alias}
           </span>
         ))
       ) : (
-        <span className="text-sm text-base-content/60">Sin aliases</span>
+        <span className="text-sm text-lux-muted">Sin aliases</span>
       )}
     </div>
   );
 
   const renderMetadata = (label: string, value: string) => (
     <div className="space-y-1">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-base-content/45">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-lux-muted">
         {label}
       </p>
-      <p className="text-sm text-base-content">{value}</p>
+      <p className="text-sm text-lux-text">{value}</p>
     </div>
   );
 
@@ -122,35 +124,14 @@ export default function MerchantList({ merchants }: MerchantListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-base-content">Merchants</h1>
-          <p className="text-sm text-base-content/70">
-            Gestioná merchants, dominios y aliases desde un solo lugar.
-          </p>
-        </div>
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          <SearchTableInput
-            placeholder="Buscar por nombre, URL o tag..."
-          />
-          <button
-            className="btn btn-primary w-full sm:w-auto"
-            onClick={openCreateDialog}
-            type="button"
-          >
-            Nuevo merchant
-          </button>
-        </div>
-      </div>
-
       {error ? (
-        <div className="alert alert-error">
-          <span>{error}</span>
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-100 text-sm">
+          {error}
         </div>
       ) : null}
 
       {merchants.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 px-6 py-14 text-center text-base-content/60 shadow-sm">
+        <div className="rounded-2xl border border-dashed border-lux-hover/40 bg-lux-surface px-6 py-14 text-center text-lux-muted shadow-sm">
           No hay merchants cargados todavia.
         </div>
       ) : (
@@ -158,33 +139,27 @@ export default function MerchantList({ merchants }: MerchantListProps) {
           <div className="grid gap-4 lg:hidden">
             {merchants.map((merchant) => (
               <article
-                className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm"
+                className="rounded-2xl border border-lux-hover/40 bg-lux-surface p-5 shadow-sm hover:border-lux-hover/70 transition-colors"
                 key={merchant.id}
               >
                 <div className="flex items-start gap-4">
                   {renderLogo(merchant)}
                   <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-base font-semibold text-base-content">
+                    <h2 className="truncate text-base font-semibold text-white">
                       {merchant.name}
                     </h2>
-                    <p className="truncate text-xs text-base-content/60">{merchant.id}</p>
+                    <p className="truncate text-xs text-lux-muted">{merchant.id}</p>
                   </div>
                 </div>
 
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   {renderMetadata("Dominio", merchant.domain ?? "-")}
-                  {renderMetadata(
-                    "Creado",
-                    formatMerchantDate(merchant.created_at)
-                  )}
-                  {renderMetadata(
-                    "Actualizado",
-                    formatMerchantDate(merchant.updated_at)
-                  )}
+                  {renderMetadata("Creado", formatMerchantDate(merchant.created_at))}
+                  {renderMetadata("Actualizado", formatMerchantDate(merchant.updated_at))}
                 </div>
 
                 <div className="mt-5 space-y-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-base-content/45">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-lux-muted">
                     Aliases
                   </p>
                   {renderAliases(merchant)}
@@ -211,45 +186,45 @@ export default function MerchantList({ merchants }: MerchantListProps) {
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto rounded-2xl border border-base-300 bg-base-100 shadow-sm lg:block">
-            <table className="table">
+          <div className="hidden overflow-x-auto rounded-xl border border-lux-hover/40 bg-lux-surface shadow-2xl lg:block">
+            <table className="w-full text-left whitespace-nowrap text-sm">
               <thead>
-                <tr>
-                  <th>Merchant</th>
-                  <th>Dominio</th>
-                  <th>Aliases</th>
-                  <th>Creado</th>
-                  <th>Actualizado</th>
-                  <th className="text-right">Acciones</th>
+                <tr className="border-b border-lux-hover/60 text-[11px] font-semibold uppercase tracking-widest text-lux-sec bg-lux-surface">
+                  <th className="px-6 py-4">Merchant</th>
+                  <th className="px-6 py-4">Dominio</th>
+                  <th className="px-6 py-4">Aliases</th>
+                  <th className="px-6 py-4">Creado</th>
+                  <th className="px-6 py-4">Actualizado</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-lux-hover/30 font-light">
                 {merchants.map((merchant) => (
-                  <tr key={merchant.id}>
-                    <td>
+                  <tr key={merchant.id} className="hover:bg-lux-hover/20 transition-colors duration-300">
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
                         {renderLogo(merchant)}
                         <div>
-                          <div className="font-semibold text-base-content">{merchant.name}</div>
-                          <div className="text-xs text-base-content/60">{merchant.id}</div>
+                          <div className="font-semibold text-white">{merchant.name}</div>
+                          <div className="text-xs text-lux-muted">{merchant.id}</div>
                         </div>
                       </div>
                     </td>
-                    <td>{merchant.domain ?? "-"}</td>
-                    <td>{renderAliases(merchant)}</td>
-                    <td>{formatMerchantDate(merchant.created_at)}</td>
-                    <td>{formatMerchantDate(merchant.updated_at)}</td>
-                    <td>
+                    <td className="px-6 py-4 text-lux-sec">{merchant.domain ?? "-"}</td>
+                    <td className="px-6 py-4">{renderAliases(merchant)}</td>
+                    <td className="px-6 py-4 text-lux-sec">{formatMerchantDate(merchant.created_at)}</td>
+                    <td className="px-6 py-4 text-lux-sec">{formatMerchantDate(merchant.updated_at)}</td>
+                    <td className="px-6 py-4">
                       <div className="flex justify-end gap-2">
                         <button
-                          className="btn btn-sm btn-ghost"
+                          className="inline-flex items-center text-[11px] font-medium text-lux-sec hover:text-lux-gold transition-colors border border-lux-hover px-3 py-1.5 rounded hover:border-lux-gold/50 uppercase tracking-wider"
                           onClick={() => openEditDialog(merchant.id)}
                           type="button"
                         >
                           Editar
                         </button>
                         <button
-                          className="btn btn-sm btn-error btn-outline"
+                          className="inline-flex items-center text-[11px] font-medium text-red-400 hover:text-red-300 transition-colors border border-red-500/30 px-3 py-1.5 rounded hover:border-red-500/60 uppercase tracking-wider disabled:opacity-40"
                           disabled={isPending}
                           onClick={() => handleDelete(merchant.id)}
                           type="button"
@@ -266,22 +241,20 @@ export default function MerchantList({ merchants }: MerchantListProps) {
         </>
       )}
 
-      {isDialogOpen ? (
+      {isEditOpen ? (
         <dialog className="modal modal-open" open>
-          <div className="modal-box w-11/12 max-w-3xl p-0">
-            <div className="flex items-start justify-between gap-4 border-b border-base-300 px-5 py-4 sm:px-6">
+          <div className="modal-box w-11/12 max-w-3xl p-0 bg-lux-surface border border-lux-hover/40">
+            <div className="flex items-start justify-between gap-4 border-b border-lux-hover/40 px-5 py-4 sm:px-6">
               <div>
-                <h2 className="text-lg font-semibold text-base-content">
-                  {dialogMode === "edit" ? "Editar merchant" : "Nuevo merchant"}
-                </h2>
-                <p className="text-sm text-base-content/65">
+                <h2 className="text-lg font-semibold text-white">Editar merchant</h2>
+                <p className="text-sm text-lux-muted font-normal">
                   Administrá identidad, dominio, logo y aliases en una sola vista.
                 </p>
               </div>
               <button
                 aria-label="Cerrar dialogo"
-                className="btn btn-circle btn-ghost btn-sm"
-                onClick={closeDialog}
+                className="btn btn-circle btn-ghost btn-sm text-lux-sec hover:text-white"
+                onClick={closeEditDialog}
                 type="button"
               >
                 ✕
@@ -291,16 +264,16 @@ export default function MerchantList({ merchants }: MerchantListProps) {
             <div className="max-h-[85vh] overflow-y-auto p-4 sm:p-6">
               <MerchantForm
                 className="border-0 bg-transparent p-0 shadow-none"
-                merchant={dialogMode === "edit" ? editingMerchant : undefined}
-                onCancel={closeDialog}
-                onSuccess={closeDialog}
+                merchant={editingMerchant}
+                onCancel={closeEditDialog}
+                onSuccess={closeEditDialog}
                 showHeader={false}
               />
             </div>
           </div>
 
-          <form className="modal-backdrop" method="dialog">
-            <button onClick={closeDialog} type="button">
+          <form className="modal-backdrop bg-black/70 backdrop-blur-sm" method="dialog">
+            <button onClick={closeEditDialog} type="button">
               close
             </button>
           </form>

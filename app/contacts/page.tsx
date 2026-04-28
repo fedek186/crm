@@ -15,10 +15,15 @@ Funciones exportadas:
 import { getOptionalAuthContext } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 import { redirect } from "next/navigation";
+import { type Prisma } from "@prisma/client";
 import KanbanBoard from "@/app/components/kanban/KanbanBoard";
 import KanbanDateFilter from "@/app/components/kanban/KanbanDateFilter";
+import PageShell from "@/app/components/ui/PageShell";
+import PageHeader from "@/app/components/ui/PageHeader";
 
-export default async function ContactsPage(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
+export default async function ContactsPage(props: {
+  searchParams?: Promise<{ [key: string]: string | undefined }>;
+}) {
   const authContext = await getOptionalAuthContext();
   if (!authContext?.isAdmin) return redirect("/login");
 
@@ -26,7 +31,7 @@ export default async function ContactsPage(props: { searchParams?: Promise<{ [ke
   const from = searchParams.from;
   const to = searchParams.to;
 
-  const whereClause: any = {};
+  const whereClause: Prisma.contactsWhereInput = {};
   if (from || to) {
     whereClause.start_date = {};
     if (from) {
@@ -45,14 +50,14 @@ export default async function ContactsPage(props: { searchParams?: Promise<{ [ke
       user: true,
     },
     orderBy: {
-      start_date: 'asc'
-    }
+      start_date: "asc",
+    },
   });
 
   // Calculamos el número de cuenta de iteraciones por usuario
   const userCounts: Record<string, number> = {};
-  const processedContacts = contacts.map(c => {
-    const uid = c.user_id || 'unknown';
+  const processedContacts = contacts.map((c) => {
+    const uid = c.user_id || "unknown";
     userCounts[uid] = (userCounts[uid] || 0) + 1;
     return { ...c, numero: userCounts[uid] };
   });
@@ -64,17 +69,18 @@ export default async function ContactsPage(props: { searchParams?: Promise<{ [ke
     <div className="min-h-screen bg-lux-bg flex flex-col">
       <div className="px-6 md:px-12 py-8 flex-1 flex flex-col items-start w-full">
         <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
-          Tablero de <span className="text-lux-gold">Contactos</span>
+          Tablero de Contactos
         </h1>
         <p className="text-lux-muted text-sm mb-6">
-          Gestiona y ordena los estados de interacción con los usuarios libremente.
+          Gestiona y ordena los estados de interacción con los usuarios
+          libremente.
         </p>
-        
+
         <KanbanDateFilter />
 
         {/* Client component para manejar el Drag and Drop */}
         <div className="w-full">
-           <KanbanBoard initialContacts={processedContacts as any} />
+          <KanbanBoard initialContacts={processedContacts as any} />
         </div>
       </div>
     </div>

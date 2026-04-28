@@ -14,13 +14,24 @@ Elementos externos:
 Funciones exportadas:
 - ProfilePage: renderiza asíncronamente la página, unificando consultas a base de datos y sirviendo el contenedor responsivo principal.
 */
+import dynamic from "next/dynamic";
 import { requireAuthenticatedAdminPage } from "@/app/lib/auth";
 import { getUserProfile, getUserTransactionHistory } from "@/app/services/userService";
 import { notFound } from "next/navigation";
 import CardContacto from "@/app/components/CardContacto";
 import AddContactModal from "@/app/components/AddContactModal";
 import BackButton from "@/app/components/BackButton";
-import UserTransactionChart from "@/app/components/UserTransactionChart";
+
+const UserTransactionChart = dynamic(() => import("@/app/components/UserTransactionChart"), {
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-lux-surface rounded-xl border border-lux-hover/30">
+      <div className="flex flex-col items-center gap-3">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lux-gold"></div>
+        <p className="text-lux-sec text-xs">Cargando gráfico...</p>
+      </div>
+    </div>
+  ),
+});
 
 type Props = {
   params: Promise<{
