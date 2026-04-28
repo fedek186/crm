@@ -257,6 +257,181 @@ export interface GetUsersOptions {
   filterVal?: string;
 }
 
+function zeroSatisfiesFilter(op: string, val: number): boolean {
+  switch (op) {
+    case "eq": return val === 0;
+    case "gt": return 0 > val;
+    case "lt": return 0 < val;
+    case "gte": return 0 >= val;
+    case "lte": return 0 <= val;
+    default: return false;
+  }
+}
+
+function buildFilterWhere(filterCol: string, filterOp: string, filterVal: string): Prisma.userSummaryWhereInput {
+  if (filterCol === "mp") {
+    if (filterOp !== "eq") return {};
+    return { mp: filterVal === "true" };
+  }
+
+  if (filterCol === "state") {
+    const stateMap: Record<string, string> = {
+      neverused: "NeverUsed",
+      new: "New",
+      active: "Active",
+      activeplus: "ActivePlus",
+      atrisk: "AtRisk",
+      churned: "Churned",
+    };
+    const lower = filterVal.toLowerCase();
+    if (filterOp === "eq") {
+      if (lower === "") return { state: null };
+      const v = stateMap[lower];
+      return v ? { state: v as any } : { id: { lt: 0 } };
+    }
+    if (filterOp === "contains") {
+      if (lower === "") return {};
+      const matches = Object.entries(stateMap).filter(([k]) => k.includes(lower)).map(([, v]) => v);
+      return matches.length > 0 ? { state: { in: matches as any[] } } : { id: { lt: 0 } };
+    }
+    return {};
+  }
+
+  const stringCols = ["name", "surname", "email", "country", "phone"];
+  if (stringCols.includes(filterCol)) {
+    const lower = filterVal.toLowerCase();
+    if (filterOp === "contains") {
+      if (lower === "") return {};
+      return { [filterCol]: { contains: filterVal, mode: "insensitive" as const } };
+    }
+    if (filterOp === "eq") {
+      if (lower === "") return { OR: [{ [filterCol]: null }, { [filterCol]: "" }] };
+      return { [filterCol]: { equals: filterVal, mode: "insensitive" as const } };
+    }
+    return {};
+  }
+
+  if (filterCol === "created_at") {
+    if (!filterVal) return { id: { lt: 0 } };
+    const start = new Date(filterVal + "T00:00:00");
+    const end = new Date(start.getTime() + 86400000);
+    switch (filterOp) {
+      case "eq": return { created_at: { gte: start, lt: end } };
+      case "gt": return { created_at: { gte: end } };
+      case "lt": return { created_at: { lt: start } };
+      case "gte": return { created_at: { gte: start } };
+      case "lte": return { created_at: { lt: end } };
+    }
+    return {};
+  }
+
+  if (filterCol === "last_contact") {
+    if (!filterVal) return { id: { lt: 0 } };
+    const start = new Date(filterVal + "T00:00:00");
+    const end = new Date(start.getTime() + 86400000);
+    switch (filterOp) {
+      case "eq":
+        return {
+          AND: [
+            { contacts: { some: { start_date: { gte: start, lt: end } } } },
+            { contacts: { none: { start_date: { gte: end } } } },
+          ],
+        };
+      case "gt":
+        return { contacts: { some: { start_date: { gte: end } } } };
+      case "lt":
+        return {
+          AND: [
+            { contacts: { some: {} } },
+            { contacts: { every: { start_date: { lt: start } } } },
+          ],
+        };
+      case "gte":
+        return { contacts: { some: { start_date: { gte: start } } } };
+      case "lte":
+        return {
+          AND: [
+            { contacts: { some: {} } },
+            { contacts: { none: { start_date: { gte: end } } } },
+          ],
+        };
+    }
+    return {};
+  }
+
+  // Numeric columns — original JS: Number(null) = 0, so null fields act as 0
+  const numVal = Number(filterVal);
+  if (isNaN(numVal)) return {}; // invalid filterVal → match all
+
+  const opMap: Record<string, object> = {
+    eq: { equals: numVal },
+    gt: { gt: numVal },
+    lt: { lt: numVal },
+    gte: { gte: numVal },
+    lte: { lte: numVal },
+  };
+  const prismaOp = opMap[filterOp];
+  if (!prismaOp) return {};
+
+  const nullableIntCols = ["week_trans", "daily_trans", "monthly_trans"];
+  const baseFilter = { [filterCol]: prismaOp };
+  if (nullableIntCols.includes(filterCol) && zeroSatisfiesFilter(filterOp, numVal)) {
+    return { OR: [baseFilter, { [filterCol]: null }] };
+  }
+  return baseFilter;
+}
+
+async function buildContactsCountWhere(filterOp: string, filterVal: string): Promise<Prisma.userSummaryWhereInput> {
+  const numVal = Number(filterVal);
+  if (isNaN(numVal)) return {}; // invalid filterVal → match all
+
+  type Row = { user_id: string | null };
+  let rows: Row[] = [];
+
+  switch (filterOp) {
+    case "eq":
+      rows = await prisma.$queryRaw<Row[]>`
+        SELECT user_id FROM "userSummary"
+        WHERE (SELECT COUNT(*) FROM contacts WHERE contacts.user_id = "userSummary".user_id) = ${numVal}
+      `;
+      break;
+    case "gt":
+      rows = await prisma.$queryRaw<Row[]>`
+        SELECT user_id FROM "userSummary"
+        WHERE (SELECT COUNT(*) FROM contacts WHERE contacts.user_id = "userSummary".user_id) > ${numVal}
+      `;
+      break;
+    case "lt":
+      rows = await prisma.$queryRaw<Row[]>`
+        SELECT user_id FROM "userSummary"
+        WHERE (SELECT COUNT(*) FROM contacts WHERE contacts.user_id = "userSummary".user_id) < ${numVal}
+      `;
+      break;
+    case "gte":
+      rows = await prisma.$queryRaw<Row[]>`
+        SELECT user_id FROM "userSummary"
+        WHERE (SELECT COUNT(*) FROM contacts WHERE contacts.user_id = "userSummary".user_id) >= ${numVal}
+      `;
+      break;
+    case "lte":
+      rows = await prisma.$queryRaw<Row[]>`
+        SELECT user_id FROM "userSummary"
+        WHERE (SELECT COUNT(*) FROM contacts WHERE contacts.user_id = "userSummary".user_id) <= ${numVal}
+      `;
+      break;
+    default:
+      return {};
+  }
+
+  const nonNullIds = rows.map(r => r.user_id).filter((id): id is string => id !== null);
+  const hasNullMatch = rows.some(r => r.user_id === null);
+
+  if (hasNullMatch) {
+    return { OR: [{ user_id: { in: nonNullIds } }, { user_id: null }] };
+  }
+  return { user_id: { in: nonNullIds } };
+}
+
 export async function getUsersFromNeon(options: GetUsersOptions = {}) {
   await assertAuthenticatedAdmin();
 
@@ -291,108 +466,48 @@ export async function getUsersFromNeon(options: GetUsersOptions = {}) {
     };
   }
 
-  const isCustomFilterActive = Boolean(filterCol && filterOp && filterVal);
-  const takeConfig = isCustomFilterActive ? undefined : limit;
-  const skipConfig = isCustomFilterActive ? undefined : skip;
-
   try {
-    const fetchPromise = prisma.userSummary.findMany({
-      include: {
-        _count: {
-          select: { contacts: true },
-        },
-        contacts: {
-          orderBy: { start_date: "desc" },
-          select: { start_date: true },
-          take: 1,
-        },
-      },
-      orderBy,
-      skip: skipConfig,
-      take: takeConfig,
-      where,
-    });
+    let customFilterWhere: Prisma.userSummaryWhereInput = {};
+    const isCustomFilterActive = Boolean(filterCol && filterOp && filterVal);
 
-    const [allUsers, baseCount] = await Promise.all([
-      fetchPromise,
-      isCustomFilterActive ? Promise.resolve(0) : prisma.userSummary.count({ where }),
-    ]);
-
-    let filteredUsers = allUsers as any[];
-
-    if (isCustomFilterActive && filterCol && filterOp && filterVal) {
-      filteredUsers = allUsers.filter((u) => {
-        let cellValue: any = null;
-
-        if (filterCol === "contacts") {
-          cellValue = u._count?.contacts || 0;
-        } else if (filterCol === "last_contact") {
-          cellValue = u.contacts?.[0]?.start_date?.getTime() || null;
-        } else if (filterCol === "mp") {
-          cellValue = u.mp;
-        } else {
-          cellValue = u[filterCol as keyof typeof u];
-        }
-
-        if (filterCol === "mp") {
-          const boolVal = filterVal === "true";
-          return filterOp === "eq" ? cellValue === boolVal : true;
-        }
-
-        const stringColumns = ["name", "surname", "email", "country", "phone", "state"];
-        if (stringColumns.includes(filterCol)) {
-          const strCell = String(cellValue || "").toLowerCase();
-          const strVal = String(filterVal).toLowerCase();
-          if (filterOp === "contains") return strCell.includes(strVal);
-          if (filterOp === "eq") return strCell === strVal;
-          return true;
-        }
-
-        if (filterCol === "last_contact" || filterCol === "created_at") {
-          if (!filterVal || cellValue === null) return false;
-
-          let actualTime = cellValue;
-          if (filterCol === "created_at") {
-            actualTime = new Date(cellValue).getTime();
-          }
-
-          const dateObjStart = new Date(filterVal + "T00:00:00");
-          const dateValStart = dateObjStart.getTime();
-          const dateValEnd = dateValStart + 86400000;
-
-          switch (filterOp) {
-            case "eq": return actualTime >= dateValStart && actualTime < dateValEnd;
-            case "gt": return actualTime >= dateValEnd;
-            case "lt": return actualTime < dateValStart;
-            case "gte": return actualTime >= dateValStart;
-            case "lte": return actualTime < dateValEnd;
-            default: return true;
-          }
-        }
-
-        const numCell = Number(cellValue);
-        const numVal = Number(filterVal);
-
-        if (isNaN(numCell) || isNaN(numVal)) return true;
-
-        switch (filterOp) {
-          case "eq": return numCell === numVal;
-          case "gt": return numCell > numVal;
-          case "lt": return numCell < numVal;
-          case "gte": return numCell >= numVal;
-          case "lte": return numCell <= numVal;
-          default: return true;
-        }
-      });
+    if (isCustomFilterActive) {
+      customFilterWhere = filterCol === "contacts"
+        ? await buildContactsCountWhere(filterOp!, filterVal!)
+        : buildFilterWhere(filterCol!, filterOp!, filterVal!);
     }
 
-    const finalTotalCount = isCustomFilterActive ? filteredUsers.length : baseCount;
-    const paginatedUsers = isCustomFilterActive ? filteredUsers.slice(skip, skip + limit) : filteredUsers;
+    const andClauses: Prisma.userSummaryWhereInput[] = [];
+    if (Object.keys(where).length > 0) andClauses.push(where);
+    if (Object.keys(customFilterWhere).length > 0) andClauses.push(customFilterWhere);
+    const combinedWhere: Prisma.userSummaryWhereInput =
+      andClauses.length === 2 ? { AND: andClauses } :
+      andClauses.length === 1 ? andClauses[0] :
+      {};
+
+    const [users, totalCount] = await Promise.all([
+      prisma.userSummary.findMany({
+        include: {
+          _count: {
+            select: { contacts: true },
+          },
+          contacts: {
+            orderBy: { start_date: "desc" },
+            select: { start_date: true },
+            take: 1,
+          },
+        },
+        orderBy,
+        skip,
+        take: limit,
+        where: combinedWhere,
+      }),
+      prisma.userSummary.count({ where: combinedWhere }),
+    ]);
 
     return {
-      totalCount: finalTotalCount,
-      totalPages: Math.ceil(finalTotalCount / limit),
-      users: paginatedUsers,
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      users,
     };
   } catch (error) {
     console.error("Error al obtener usuarios de la base principal:", error);

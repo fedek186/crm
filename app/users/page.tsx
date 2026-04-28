@@ -53,7 +53,7 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
   const filterOp = searchParams.filterOp;
   const filterVal = searchParams.filterVal;
 
-  const { users, totalPages } = await getUsersFromNeon({
+  const { users, totalPages, totalCount } = await getUsersFromNeon({
     page,
     limit: 50,
     search,
@@ -74,6 +74,9 @@ export default async function Home(props: { searchParams?: Promise<{ [key: strin
             <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight text-white drop-shadow-sm">
               Usuarios
             </h1>
+            <p className="text-sm font-medium tracking-wide text-lux-gold">
+              {totalCount} {totalCount === 1 ? 'usuario encontrado' : 'usuarios encontrados'}
+            </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto mt-4 md:mt-0">
