@@ -9,6 +9,7 @@ Elementos externos:
 
 Funciones exportadas:
 - addContactAction: inserta un nuevo contacto asociado a un usuario.
+- addBulkContactsAction: busca una lista de emails y crea contactos de forma masiva para dichos usuarios.
 - updateContactStateAction: actualiza el estado (contactado, hablando, etc.) de la ficha individual.
 - updateContactNotesAction: almacena el texto enriquecido de las notas del contacto.
 - deleteContactAction: elimina físicamente el registro de la interacción de este usuario.
@@ -44,6 +45,64 @@ export async function addContactAction(formData: FormData) {
   } catch (error) {
     console.error("Error adding contact:", error);
     return { success: false, error: "No se pudo añadir el contacto" };
+  }
+}
+
+export async function addBulkContactsAction(data: {
+  emails: string[];
+  state: ContactState;
+  objective: ContactObjective;
+  media: media;
+  notes?: string;
+}) {
+  await assertAuthenticatedAdmin();
+
+  try {
+    // Buscar los usuarios por email
+    const users = await prisma.userSummary.findMany({
+      where: {
+        email: {
+          in: data.emails,
+        },
+      },
+      select: {
+        user_id: true,
+        email: true,
+      },
+    });
+
+    const userIds = users.map(u => u.user_id).filter(id => id !== null) as string[];
+
+    if (userIds.length === 0) {
+      return { success: false, error: "No se encontraron usuarios con esos emails." };
+    }
+
+    // Crear los contactos
+    const newContactsData = userIds.map((userId) => ({
+      user_id: userId,
+      state: data.state || "contacted",
+      objective: data.objective || "activation",
+      media: data.media || "email",
+      notes: data.notes || null,
+      start_date: new Date(),
+    }));
+
+    const result = await prisma.contacts.createMany({
+      data: newContactsData,
+    });
+
+    // Revalidate paths for all affected profiles and the main contacts page
+    revalidatePath(`/contacts`);
+    revalidatePath(`/users`);
+    
+    return { 
+      success: true, 
+      count: result.count,
+      foundEmails: users.map(u => u.email)
+    };
+  } catch (error) {
+    console.error("Error adding bulk contacts:", error);
+    return { success: false, error: "No se pudo crear la campaña para los usuarios." };
   }
 }
 

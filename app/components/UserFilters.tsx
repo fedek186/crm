@@ -13,6 +13,7 @@ Funciones exportadas:
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useState, useEffect } from "react";
+import BulkContactModal from "./BulkContactModal";
 
 export type FilterColumn = 
   | "name" | "surname" | "email" | "country" | "phone" | "created_at"
@@ -222,6 +223,7 @@ export default function UserFilters() {
         </label>
 
         <div className="flex gap-2 w-full sm:w-auto mt-4 lg:mt-0">
+          <BulkContactModal />
           <button
             onClick={applyFilter}
             disabled={isPending || val === ""}
