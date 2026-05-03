@@ -2,7 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc *)",
-      "Bash(xargs cat *)"
+      "Bash(xargs cat *)",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__list_tables"
+    ]
+  },
+    "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__supabase__execute_sql",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python $CLAUDE_PROJECT_DIR/.claude/hooks/deleteBlock.py"
+          }
+        ]
+      }
     ]
   }
+
 }
